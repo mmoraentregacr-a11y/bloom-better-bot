@@ -22,6 +22,7 @@ import Productos from "./pages/Productos.tsx";
 import Categoria from "./pages/Categoria.tsx";
 import Cuenta from "./pages/Cuenta.tsx";
 import AdminPedidos from "./pages/AdminPedidos.tsx";
+import AdminInventario from "./pages/AdminInventario.tsx";
 import CreaTuRamo from "./pages/CreaTuRamo.tsx";
 
 const queryClient = new QueryClient();
@@ -51,6 +52,7 @@ const App = () => (
             <Route path="/suscripcion" element={<Suscripcion />} />
             <Route path="/cuenta" element={<Cuenta />} />
             <Route path="/admin/pedidos" element={<AdminPedidos />} />
+            <Route path="/admin/inventario" element={<AdminInventario />} />
             <Route path="/crea-tu-ramo" element={<CreaTuRamo />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

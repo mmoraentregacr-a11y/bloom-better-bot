@@ -42,6 +42,7 @@ function serverError(error: unknown): HttpResponseInit {
     const reference=crypto.randomUUID().slice(0,8);
     console.error(`[${reference}]`,error);
     const sqlMessage=error instanceof Error?error.message:"";
+    if(/Invalid object name 'dbo\.Inventory|Invalid object name 'Inventory|InventoryItems|InventoryMovements/i.test(sqlMessage)) return json({message:"Falta aplicar la actualización de inventario en la base de datos.",code:"INVENTORY_SCHEMA_OUTDATED",reference},503);
     if(/Invalid column name|invoice_number|tax_amount|tax_rate/i.test(sqlMessage)) return json({message:"Falta aplicar la actualización de facturación en la base de datos.",code:"DATABASE_SCHEMA_OUTDATED",reference},503);
     if(/duplicate key|unique index|UX_Customers_Email/i.test(sqlMessage)) return json({message:"El correo está vinculado a otra cuenta de cliente. Cierra la sesión e ingresa nuevamente.",code:"CUSTOMER_EMAIL_CONFLICT",reference},409);
     const diagnostic=sqlMessage.replace(/(password|pwd|accesskey)\s*=\s*[^;\s]+/gi,"$1=[hidden]").slice(0,240);
@@ -146,12 +147,72 @@ app.http("dashboardOrders", { methods:["GET"], authLevel:"anonymous", route:"das
   return json({orders:sets[0].map(order=>({...order,items:JSON.parse(String(order.items||"[]")),delivery:JSON.parse(String(order.delivery_json||"{}")),delivery_json:undefined})),stats:sets[1][0]||{total:0,pending:0,paid:0,cancelled:0}});
 }) });
 
+app.http("inventory", { methods:["GET"], authLevel:"anonymous", route:"inventory", handler:(request) => secured(request, async identity => {
+  if(!identity.admin) throw new Error("FORBIDDEN");
+  const pool=await database();
+  await pool.request().query(`
+    MERGE InventoryItems AS target USING (
+      SELECT p.sku,p.name,'product' item_type,'unidad' unit FROM Products p WHERE p.is_active=1
+      UNION ALL SELECT b.sku,CONCAT(b.name,CASE WHEN NULLIF(b.color_name,'') IS NULL THEN '' ELSE CONCAT(' ',b.color_name) END),'component','unidad' FROM BuilderOptions b WHERE b.is_active=1
+    ) AS source ON target.sku=source.sku
+    WHEN MATCHED THEN UPDATE SET name=source.name,item_type=source.item_type,is_active=1,updated_at=SYSUTCDATETIME()
+    WHEN NOT MATCHED THEN INSERT(sku,name,item_type,unit) VALUES(source.sku,source.name,source.item_type,source.unit);`);
+  const result=await pool.request().query(`
+    SELECT id,sku,name,item_type,unit,current_stock,minimum_stock,
+      CAST(CASE WHEN current_stock<=minimum_stock THEN 1 ELSE 0 END AS bit) low_stock
+    FROM InventoryItems WHERE is_active=1 ORDER BY CASE WHEN current_stock<=minimum_stock THEN 0 ELSE 1 END,name;
+    SELECT TOP(100) m.id,m.movement_type,m.quantity,m.order_id,o.invoice_number,m.notes,m.created_by,m.created_at,i.sku,i.name,i.unit
+    FROM InventoryMovements m JOIN InventoryItems i ON i.id=m.inventory_item_id LEFT JOIN Orders o ON o.id=m.order_id ORDER BY m.created_at DESC,m.id DESC;
+    SELECT COUNT(*) item_count,SUM(CASE WHEN current_stock<=minimum_stock THEN 1 ELSE 0 END) low_stock_count,
+      SUM(CASE WHEN current_stock<0 THEN 1 ELSE 0 END) negative_stock_count FROM InventoryItems WHERE is_active=1;`);
+  const sets=result.recordsets as sql.IRecordSet<Record<string,unknown>>[];
+  return json({items:sets[0],movements:sets[1],stats:sets[2][0]||{item_count:0,low_stock_count:0,negative_stock_count:0}});
+}) });
+
+app.http("inventoryMovement", { methods:["POST"], authLevel:"anonymous", route:"inventory-movements", handler:(request) => secured(request, async identity => {
+  if(!identity.admin) throw new Error("FORBIDDEN");
+  const body=await request.json() as {sku?:string;type?:string;quantity?:number;notes?:string};
+  const skuValue=String(body.sku||"").trim().slice(0,100);
+  const type=String(body.type||"");
+  const quantity=Number(body.quantity);
+  if(!skuValue||!["purchase","damage"].includes(type)||!Number.isFinite(quantity)||quantity<=0||quantity>100000) return json({message:"El movimiento de inventario no es válido."},400);
+  const delta=type==="purchase"?quantity:-quantity;
+  const pool=await database(); const tx=new sql.Transaction(pool); await tx.begin(sql.ISOLATION_LEVEL.SERIALIZABLE);
+  try {
+    const item=(await new sql.Request(tx).input("sku",sql.VarChar,skuValue).query(`SELECT id,current_stock FROM InventoryItems WITH(UPDLOCK,HOLDLOCK) WHERE sku=@sku AND is_active=1`)).recordset[0];
+    if(!item){await tx.rollback();return json({message:"Producto de inventario no encontrado."},404);}
+    if(type==="damage"&&Number(item.current_stock)<quantity){await tx.rollback();return json({message:"La baja por daño supera la existencia disponible."},409);}
+    await new sql.Request(tx).input("id",sql.UniqueIdentifier,item.id).input("delta",sql.Decimal(12,2),delta).query(`UPDATE InventoryItems SET current_stock=current_stock+@delta,updated_at=SYSUTCDATETIME() WHERE id=@id`);
+    await new sql.Request(tx).input("id",sql.UniqueIdentifier,item.id).input("type",sql.VarChar,type).input("quantity",sql.Decimal(12,2),delta).input("notes",sql.NVarChar,String(body.notes||"").trim().slice(0,400)||null).input("admin",sql.NVarChar,identity.email).query(`INSERT InventoryMovements(inventory_item_id,movement_type,quantity,notes,created_by) VALUES(@id,@type,@quantity,@notes,@admin)`);
+    await tx.commit(); return json({ok:true,currentStock:money(Number(item.current_stock)+delta)});
+  } catch(error){await tx.rollback();throw error;}
+}) });
+
 app.http("confirmDashboardOrder", { methods:["POST"], authLevel:"anonymous", route:"dashboard-orders/{id}/confirm", handler:(request) => secured(request, async identity => {
   if (!identity.admin) throw new Error("FORBIDDEN"); const id=request.params.id; const pool=await database(); const tx=new sql.Transaction(pool); await tx.begin(sql.ISOLATION_LEVEL.SERIALIZABLE);
   try {
     const order=(await new sql.Request(tx).input("id",sql.UniqueIdentifier,id).query(`SELECT customer_id,total,status FROM Orders WITH(UPDLOCK,HOLDLOCK) WHERE id=@id`)).recordset[0];
     if (!order) { await tx.rollback(); return json({message:"Pedido no encontrado."},404); }
     if (order.status!=="pending") { await tx.rollback(); return json({message:"El pedido ya fue procesado."},409); }
+    await new sql.Request(tx).input("order",sql.UniqueIdentifier,id).input("admin",sql.NVarChar,identity.email).query(`
+      ;WITH SoldRaw AS (
+        SELECT oi.sku,oi.name,CAST(oi.quantity AS decimal(12,2)) quantity FROM OrderItems oi WHERE oi.order_id=@order AND oi.sku<>'CUSTOM-BOUQUET'
+        UNION ALL
+        SELECT cbi.sku,cbi.name,CAST(cbi.quantity*oi.quantity AS decimal(12,2)) quantity FROM CustomBouquetItems cbi JOIN OrderItems oi ON oi.id=cbi.order_item_id WHERE oi.order_id=@order
+      ), Sold AS (SELECT sku,MAX(name) name,SUM(quantity) quantity FROM SoldRaw GROUP BY sku)
+      MERGE InventoryItems AS target USING Sold AS source ON target.sku=source.sku
+      WHEN NOT MATCHED THEN INSERT(sku,name,item_type,unit,current_stock) VALUES(source.sku,source.name,'product','unidad',0);
+      ;WITH SoldRaw AS (
+        SELECT oi.sku,CAST(oi.quantity AS decimal(12,2)) quantity FROM OrderItems oi WHERE oi.order_id=@order AND oi.sku<>'CUSTOM-BOUQUET'
+        UNION ALL SELECT cbi.sku,CAST(cbi.quantity*oi.quantity AS decimal(12,2)) FROM CustomBouquetItems cbi JOIN OrderItems oi ON oi.id=cbi.order_item_id WHERE oi.order_id=@order
+      ), Sold AS (SELECT sku,SUM(quantity) quantity FROM SoldRaw GROUP BY sku)
+      UPDATE i SET current_stock=i.current_stock-s.quantity,updated_at=SYSUTCDATETIME() FROM InventoryItems i JOIN Sold s ON s.sku=i.sku;
+      ;WITH SoldRaw AS (
+        SELECT oi.sku,CAST(oi.quantity AS decimal(12,2)) quantity FROM OrderItems oi WHERE oi.order_id=@order AND oi.sku<>'CUSTOM-BOUQUET'
+        UNION ALL SELECT cbi.sku,CAST(cbi.quantity*oi.quantity AS decimal(12,2)) FROM CustomBouquetItems cbi JOIN OrderItems oi ON oi.id=cbi.order_item_id WHERE oi.order_id=@order
+      ), Sold AS (SELECT sku,SUM(quantity) quantity FROM SoldRaw GROUP BY sku)
+      INSERT InventoryMovements(inventory_item_id,movement_type,quantity,order_id,notes,created_by)
+      SELECT i.id,'sale',-s.quantity,@order,'Salida automática por venta confirmada',@admin FROM Sold s JOIN InventoryItems i ON i.sku=s.sku;`);
     if(String(order.customer_id).startsWith("guest:")) {
       await new sql.Request(tx).input("id",sql.UniqueIdentifier,id).query(`UPDATE Orders SET status='paid',paid_at=SYSUTCDATETIME() WHERE id=@id`);
       await tx.commit(); return json({ok:true,purchaseCount:null,loyaltyEligible:false});

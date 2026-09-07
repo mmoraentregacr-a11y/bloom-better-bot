@@ -4,7 +4,7 @@
 
 1. Un tenant externo de Microsoft Entra External ID.
 2. Una aplicación SPA y una aplicación/API registrada en ese tenant.
-3. Azure SQL Database con el script `azure/schema.sql` ejecutado.
+3. Azure SQL Database con `azure/schema.sql` para instalaciones nuevas y las migraciones numeradas aplicadas en orden.
 4. Azure Static Web Apps conectado a este repositorio.
 
 ## Variables del frontend
@@ -36,3 +36,11 @@ Nunca guardar secretos ni la cadena de conexión en GitHub o en archivos `.env`.
 - El pedido 10 crea un crédito igual al 10% de lo pagado durante el ciclo.
 - La siguiente compra confirmada después del pedido 10 inicia un ciclo nuevo.
 
+## Inventario
+
+Ejecutar una vez `azure/003-inventory.sql` sobre la base de datos `goldenbloom` antes de usar el módulo.
+
+- Las entradas por compra se registran manualmente desde `/admin/inventario`.
+- Al confirmar una venta se crea automáticamente una salida ligada a su factura.
+- Los ramos personalizados descuentan cada componente utilizado.
+- Las flores o productos no vendibles se registran como bajas por daño.
