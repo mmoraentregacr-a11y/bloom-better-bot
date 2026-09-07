@@ -106,7 +106,7 @@ app.http("orders", { methods: ["POST"], authLevel: "anonymous", route: "orders",
   } catch(error) { await tx.rollback(); throw error; }
 }) });
 
-app.http("adminOrders", { methods:["GET"], authLevel:"anonymous", route:"admin-orders", handler:(request) => secured(request, async identity => {
+app.http("dashboardOrders", { methods:["GET"], authLevel:"anonymous", route:"dashboard-orders", handler:(request) => secured(request, async identity => {
   if (!identity.admin) throw new Error("FORBIDDEN");
   const search=(request.query.get("search")||"").trim().slice(0,100);
   const requestedStatus=request.query.get("status")||"all";
@@ -124,7 +124,7 @@ app.http("adminOrders", { methods:["GET"], authLevel:"anonymous", route:"admin-o
   return json({orders:sets[0].map(order=>({...order,items:JSON.parse(String(order.items||"[]")),delivery:JSON.parse(String(order.delivery_json||"{}")),delivery_json:undefined})),stats:sets[1][0]||{total:0,pending:0,paid:0,cancelled:0}});
 }) });
 
-app.http("confirmOrder", { methods:["POST"], authLevel:"anonymous", route:"admin-orders/{id}/confirm", handler:(request) => secured(request, async identity => {
+app.http("confirmDashboardOrder", { methods:["POST"], authLevel:"anonymous", route:"dashboard-orders/{id}/confirm", handler:(request) => secured(request, async identity => {
   if (!identity.admin) throw new Error("FORBIDDEN"); const id=request.params.id; const pool=await database(); const tx=new sql.Transaction(pool); await tx.begin(sql.ISOLATION_LEVEL.SERIALIZABLE);
   try {
     const order=(await new sql.Request(tx).input("id",sql.UniqueIdentifier,id).query(`SELECT customer_id,total,status FROM Orders WITH(UPDLOCK,HOLDLOCK) WHERE id=@id`)).recordset[0];
