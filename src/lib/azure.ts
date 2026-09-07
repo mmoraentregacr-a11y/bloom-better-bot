@@ -5,6 +5,7 @@ import {
 } from "@azure/msal-browser";
 
 const tenantName = import.meta.env.VITE_AZURE_TENANT_NAME as string | undefined;
+const tenantId = import.meta.env.VITE_AZURE_TENANT_ID as string | undefined;
 const clientId = import.meta.env.VITE_AZURE_CLIENT_ID as string | undefined;
 const apiClientId = import.meta.env.VITE_AZURE_API_CLIENT_ID as string | undefined;
 
@@ -14,7 +15,12 @@ export const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL as string | undefin
 const authority = tenantName
   ? `https://${tenantName}.ciamlogin.com/${tenantName}.onmicrosoft.com`
   : "https://login.microsoftonline.com/common";
-const knownAuthorities = tenantName ? [`${tenantName}.ciamlogin.com`] : [];
+const knownAuthorities = tenantName
+  ? [
+      `${tenantName}.ciamlogin.com`,
+      ...(tenantId ? [`${tenantId}.ciamlogin.com`] : []),
+    ]
+  : [];
 
 export const msal = new PublicClientApplication({
   auth: {
