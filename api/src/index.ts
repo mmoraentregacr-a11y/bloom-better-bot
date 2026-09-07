@@ -88,10 +88,13 @@ app.http("orders", { methods: ["POST"], authLevel: "anonymous", route: "orders",
         }
       }
     }
-    const subtotal=money(pricedItems.reduce((sum,item)=>sum+item.unitPrice*Math.floor(item.quantity),0));
+    const total=money(pricedItems.reduce((sum,item)=>sum+item.unitPrice*Math.floor(item.quantity),0));
     const configuredTaxRate=Number(process.env.IVA_RATE||"0.13");
     const taxRate=Number.isFinite(configuredTaxRate)&&configuredTaxRate>=0&&configuredTaxRate<=1?configuredTaxRate:0.13;
-    const taxAmount=money(subtotal*taxRate); const total=money(subtotal+taxAmount);
+    // Catalog prices already include IVA. Extract it for the invoice instead of
+    // charging the customer a second time.
+    const subtotal=money(total/(1+taxRate));
+    const taxAmount=money(total-subtotal);
     const orderId = crypto.randomUUID();
     const invoiceNumber=`GB-${new Date().toISOString().slice(0,10).replaceAll("-","")}-${orderId.slice(0,8).toUpperCase()}`; const createdAt=new Date().toISOString();
     await new sql.Request(tx).input("id",sql.UniqueIdentifier,orderId).input("customer",sql.NVarChar,customer).input("invoice",sql.VarChar,invoiceNumber).input("subtotal",sql.Decimal(12,2),subtotal).input("taxRate",sql.Decimal(6,5),taxRate).input("taxAmount",sql.Decimal(12,2),taxAmount).input("total",sql.Decimal(12,2),total).input("delivery",sql.NVarChar,JSON.stringify(body.delivery||{})).query(`INSERT Orders(id,customer_id,invoice_number,subtotal,tax_rate,tax_amount,total,status,delivery_json) VALUES(@id,@customer,@invoice,@subtotal,@taxRate,@taxAmount,@total,'pending',@delivery)`);
