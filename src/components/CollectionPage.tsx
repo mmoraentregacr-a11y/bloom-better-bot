@@ -15,7 +15,9 @@ type Props = {
 
 const CollectionPage = ({ eyebrow, title, description, heroImage, products, catalog }: Props) => {
   const liveCatalog = useQuery({ queryKey: ["catalog", catalog], queryFn: () => customerApi.catalog(catalog), enabled: azureConfigured });
-  const displayedProducts = azureConfigured ? (liveCatalog.data || []) : products;
+  const displayedProducts = azureConfigured && liveCatalog.data?.length
+    ? liveCatalog.data
+    : products;
   return (
   <PageLayout>
     {/* Hero */}
