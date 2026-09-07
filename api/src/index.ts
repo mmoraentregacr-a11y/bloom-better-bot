@@ -29,14 +29,18 @@ async function secured(request: HttpRequest, handler: (identity: CustomerIdentit
     const message = error instanceof Error ? error.message : "UNKNOWN";
     if (message === "UNAUTHORIZED") return json({ message: "Debes iniciar sesión." }, 401);
     if (message === "FORBIDDEN") return json({ message: "No tienes acceso a este módulo." }, 403);
-    console.error(error);
-    return json({ message: "Ocurrió un error en el servidor." }, 500);
+    const reference=crypto.randomUUID().slice(0,8);
+    console.error(`[${reference}]`,error);
+    const sqlMessage=error instanceof Error?error.message:"";
+    if(/Invalid column name|invoice_number|tax_amount|tax_rate/i.test(sqlMessage)) return json({message:"Falta aplicar la actualización de facturación en la base de datos.",code:"DATABASE_SCHEMA_OUTDATED",reference},503);
+    if(/duplicate key|unique index|UX_Customers_Email/i.test(sqlMessage)) return json({message:"El correo está vinculado a otra cuenta de cliente. Cierra la sesión e ingresa nuevamente.",code:"CUSTOMER_EMAIL_CONFLICT",reference},409);
+    return json({ message: "Ocurrió un error en el servidor.", code:"SERVER_ERROR", reference }, 500);
   }
 }
 
 app.http("me", { methods: ["GET"], authLevel: "anonymous", route: "me", handler: (request) => secured(request, async identity => {
   const pool = await database();
-  const customer=(await pool.request().input("id",sql.NVarChar,identity.id).input("email",sql.NVarChar,identity.email).input("name",sql.NVarChar,identity.name).query(`DECLARE @customer nvarchar(128); SELECT TOP(1) @customer=id FROM Customers WHERE id=@id OR email=@email ORDER BY CASE WHEN id=@id THEN 0 ELSE 1 END; IF @customer IS NULL BEGIN SET @customer=@id; INSERT Customers(id,email,name) VALUES(@customer,@email,@name); END ELSE UPDATE Customers SET email=@email,name=@name WHERE id=@customer; SELECT @customer id;`)).recordset[0].id;
+  const customer=(await pool.request().input("id",sql.NVarChar,identity.id).input("email",sql.NVarChar,identity.email).input("name",sql.NVarChar,identity.name).query(`DECLARE @customer nvarchar(128); SELECT TOP(1) @customer=id FROM Customers WHERE email=@email; IF @customer IS NULL SELECT TOP(1) @customer=id FROM Customers WHERE id=@id; IF @customer IS NULL BEGIN SET @customer=@id; INSERT Customers(id,email,name) VALUES(@customer,@email,@name); END ELSE UPDATE Customers SET email=@email,name=@name WHERE id=@customer; SELECT @customer id;`)).recordset[0].id;
   const result = await pool.request().input("id", sql.NVarChar, customer).query(`
     SELECT c.name,c.email,c.phone,l.purchase_count,l.cycle_spend,
       CAST(CASE WHEN EXISTS(SELECT 1 FROM Benefits b WHERE b.customer_id=c.id AND b.kind='free_shipping' AND b.redeemed_at IS NULL) THEN 1 ELSE 0 END AS bit) free_shipping,
@@ -54,7 +58,7 @@ app.http("orders", { methods: ["POST"], authLevel: "anonymous", route: "orders",
   if (!body.items?.length || body.items.some(i => !i.id || !i.name?.trim() || i.name.length>240 || !Number.isInteger(i.quantity) || i.quantity<1 || i.quantity>100)) return json({ message: "El pedido no es válido." }, 400);
   const pool = await database(); const tx = new sql.Transaction(pool); await tx.begin();
   try {
-    const customer=(await new sql.Request(tx).input("id",sql.NVarChar,identity.id).input("email",sql.NVarChar,identity.email).input("name",sql.NVarChar,identity.name).query(`DECLARE @customer nvarchar(128); SELECT TOP(1) @customer=id FROM Customers WITH(UPDLOCK,HOLDLOCK) WHERE id=@id OR email=@email ORDER BY CASE WHEN id=@id THEN 0 ELSE 1 END; IF @customer IS NULL BEGIN SET @customer=@id; INSERT Customers(id,email,name) VALUES(@customer,@email,@name); END ELSE UPDATE Customers SET email=@email,name=@name WHERE id=@customer; SELECT @customer id;`)).recordset[0].id;
+    const customer=(await new sql.Request(tx).input("id",sql.NVarChar,identity.id).input("email",sql.NVarChar,identity.email).input("name",sql.NVarChar,identity.name).query(`DECLARE @customer nvarchar(128); SELECT TOP(1) @customer=id FROM Customers WITH(UPDLOCK,HOLDLOCK) WHERE email=@email; IF @customer IS NULL SELECT TOP(1) @customer=id FROM Customers WITH(UPDLOCK,HOLDLOCK) WHERE id=@id; IF @customer IS NULL BEGIN SET @customer=@id; INSERT Customers(id,email,name) VALUES(@customer,@email,@name); END ELSE UPDATE Customers SET email=@email,name=@name WHERE id=@customer; SELECT @customer id;`)).recordset[0].id;
     const pricedItems: Array<IncomingItem & { unitPrice:number; displayName:string; resolved?:Array<{id:string;sku:string;name:string;quantity:number;unitPrice:number}> }> = [];
     for (const item of body.items) {
       if (item.sku === "CUSTOM-BOUQUET") {
