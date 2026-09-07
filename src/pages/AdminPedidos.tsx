@@ -21,12 +21,12 @@ const AdminPedidos = () => {
   const deferredSearch = useDeferredValue(search.trim());
   const orders = useQuery({
     queryKey:["admin-orders",deferredSearch,status], enabled:Boolean(account),
-    queryFn:async()=>{const token=await accessToken(account!);const params=new URLSearchParams({status});if(deferredSearch)params.set("search",deferredSearch);const response=await fetch(`${apiBaseUrl}/admin/orders?${params}`,{headers:{Authorization:`Bearer ${token}`}});if(!response.ok)throw new Error(response.status===403?"Tu cuenta no tiene permisos de administración.":"No se pudieron cargar los pedidos.");return response.json() as Promise<AdminResponse>;},
+    queryFn:async()=>{const token=await accessToken(account!);const params=new URLSearchParams({status});if(deferredSearch)params.set("search",deferredSearch);const response=await fetch(`${apiBaseUrl}/admin/orders?${params}`,{headers:{"X-Golden-Bloom-Authorization":`Bearer ${token}`}});if(!response.ok)throw new Error(response.status===403?"Tu cuenta no tiene permisos de administración.":"No se pudieron cargar los pedidos.");return response.json() as Promise<AdminResponse>;},
   });
 
   const confirm = async(id:string) => {
     if(!account || !window.confirm("¿Confirmar este pedido como pagado? Esta acción sumará un sello al cliente.")) return;
-    const token=await accessToken(account); const response=await fetch(`${apiBaseUrl}/admin/orders/${id}/confirm`,{method:"POST",headers:{Authorization:`Bearer ${token}`}}); const body=await response.json().catch(()=>({}));
+    const token=await accessToken(account); const response=await fetch(`${apiBaseUrl}/admin/orders/${id}/confirm`,{method:"POST",headers:{"X-Golden-Bloom-Authorization":`Bearer ${token}`}}); const body=await response.json().catch(()=>({}));
     if(!response.ok) return toast({title:"No se pudo confirmar",description:body.message,variant:"destructive"});
     toast({title:"Compra confirmada",description:`El cliente ahora tiene ${body.purchaseCount} de 10 sellos.`});
     await queryClient.invalidateQueries({queryKey:["admin-orders"]});

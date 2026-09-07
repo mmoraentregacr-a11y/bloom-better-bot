@@ -10,7 +10,7 @@ async function authenticatedFetch<T>(account: AccountInfo, path: string, init?: 
     ...init,
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      "X-Golden-Bloom-Authorization": `Bearer ${token}`,
       ...init?.headers,
     },
   });

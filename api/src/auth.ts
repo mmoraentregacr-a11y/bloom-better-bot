@@ -6,7 +6,7 @@ export type CustomerIdentity = { id: string; email: string; name: string; admin:
 let jwks: ReturnType<typeof createRemoteJWKSet> | undefined;
 
 export async function authenticate(request: HttpRequest): Promise<CustomerIdentity> {
-  const header = request.headers.get("authorization");
+  const header = request.headers.get("x-golden-bloom-authorization");
   const token = /^Bearer\s+(.+)$/i.exec(header || "")?.[1]?.trim();
   if (!token) throw new Error("UNAUTHORIZED");
 
