@@ -17,13 +17,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    msal.initialize().then(async () => {
-      const redirect = await msal.handleRedirectPromise();
-      const active = redirect?.account || msal.getActiveAccount() || msal.getAllAccounts()[0] || null;
-      if (active) msal.setActiveAccount(active);
-      setAccount(active);
-      setReady(true);
-    });
+    let mounted = true;
+
+    const initializeAuth = async () => {
+      try {
+        await msal.initialize();
+        let redirectAccount: AccountInfo | null = null;
+
+        try {
+          redirectAccount = (await msal.handleRedirectPromise())?.account || null;
+        } catch (error) {
+          // Popup sign-in can leave a stale redirect entry during local HMR.
+          // It is safe to continue with the account already stored by MSAL.
+          console.warn("No se pudo restaurar la redirección de inicio de sesión.", error);
+        }
+
+        const active = redirectAccount || msal.getActiveAccount() || msal.getAllAccounts()[0] || null;
+        if (active) msal.setActiveAccount(active);
+        if (mounted) setAccount(active);
+      } catch (error) {
+        console.error("No se pudo inicializar Microsoft Entra.", error);
+      } finally {
+        if (mounted) setReady(true);
+      }
+    };
+
+    void initializeAuth();
+    return () => { mounted = false; };
   }, []);
 
   const value = useMemo<AuthContextValue>(() => ({
@@ -49,4 +69,3 @@ export function useAuth() {
   if (!value) throw new Error("useAuth must be used within AuthProvider");
   return value;
 }
-
