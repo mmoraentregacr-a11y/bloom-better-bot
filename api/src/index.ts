@@ -49,9 +49,9 @@ app.http("me", { methods: ["GET"], authLevel: "anonymous", route: "me", handler:
 }) });
 
 app.http("orders", { methods: ["POST"], authLevel: "anonymous", route: "orders", handler: (request) => secured(request, async identity => {
-  type IncomingItem = { id:string; sku?:string; name:string; quantity:number; configuration?:Array<{optionId:string;sku:string;name:string;quantity:number}> };
+  type IncomingItem = { id:string; sku?:string; name:string; price?:number; quantity:number; configuration?:Array<{optionId:string;sku:string;name:string;quantity:number}> };
   const body = await request.json() as { items?: IncomingItem[]; delivery?: Record<string,string> };
-  if (!body.items?.length || body.items.some(i => !i.id || !i.name || !i.sku || i.quantity < 1)) return json({ message: "El pedido no es válido." }, 400);
+  if (!body.items?.length || body.items.some(i => !i.id || !i.name?.trim() || i.name.length>240 || !Number.isInteger(i.quantity) || i.quantity<1 || i.quantity>100)) return json({ message: "El pedido no es válido." }, 400);
   const pool = await database(); const tx = new sql.Transaction(pool); await tx.begin();
   try {
     const customer=(await new sql.Request(tx).input("id",sql.NVarChar,identity.id).input("email",sql.NVarChar,identity.email).input("name",sql.NVarChar,identity.name).query(`DECLARE @customer nvarchar(128); SELECT TOP(1) @customer=id FROM Customers WITH(UPDLOCK,HOLDLOCK) WHERE id=@id OR email=@email ORDER BY CASE WHEN id=@id THEN 0 ELSE 1 END; IF @customer IS NULL BEGIN SET @customer=@id; INSERT Customers(id,email,name) VALUES(@customer,@email,@name); END ELSE UPDATE Customers SET email=@email,name=@name WHERE id=@customer; SELECT @customer id;`)).recordset[0].id;
@@ -72,9 +72,14 @@ app.http("orders", { methods: ["POST"], authLevel: "anonymous", route: "orders",
         if(flowers < 1 || wraps > 1) { await tx.rollback(); return json({message:"Revisa las flores y la envoltura del ramo."},400); }
         pricedItems.push({...item,unitPrice:money(unitPrice),displayName:"Ramo personalizado",resolved});
       } else {
-        const product=(await new sql.Request(tx).input("sku",sql.VarChar,item.sku).query(`SELECT sku,name,price FROM Products WHERE sku=@sku AND is_active=1`)).recordset[0];
-        if(!product) { await tx.rollback(); return json({message:`El producto ${item.sku} no está disponible en el catálogo.`},409); }
-        pricedItems.push({...item,unitPrice:money(product.price),displayName:product.name});
+        const sku=item.sku||`LEGACY-${item.id.toUpperCase()}`;
+        const product=(await new sql.Request(tx).input("sku",sql.VarChar,sku).query(`SELECT sku,name,price FROM Products WHERE sku=@sku AND is_active=1`)).recordset[0];
+        if(product) pricedItems.push({...item,sku:product.sku,unitPrice:money(product.price),displayName:product.name});
+        else {
+          const submittedPrice=money(item.price);
+          if(!sku.startsWith("LEGACY-")||!Number.isFinite(submittedPrice)||submittedPrice<0||submittedPrice>10000000){await tx.rollback();return json({message:`El producto ${sku} no está disponible en el catálogo.`},409);}
+          pricedItems.push({...item,sku,unitPrice:submittedPrice,displayName:item.name.trim()});
+        }
       }
     }
     const subtotal=money(pricedItems.reduce((sum,item)=>sum+item.unitPrice*Math.floor(item.quantity),0));
