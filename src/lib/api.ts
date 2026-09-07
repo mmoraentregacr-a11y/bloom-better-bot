@@ -42,10 +42,15 @@ export const customerApi = {
       method: "POST",
       body: JSON.stringify(payload),
     }),
+  createGuestOrder: async (payload: { items: CartItem[]; delivery: Record<string, string> }) => {
+    const response=await fetch(`${apiBaseUrl}/orders`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    if(!response.ok){const body=await response.json().catch(()=>null);throw new Error(body?.message||"No pudimos completar la solicitud.");}
+    return response.json() as Promise<OrderInvoice>;
+  },
 };
 
 export type OrderInvoice = {
   id:string; invoiceNumber:string; createdAt:string; currency:"CRC";
   items:Array<{sku:string;name:string;quantity:number;unitPrice:number;lineSubtotal:number;configuration?:Array<{sku:string;name:string;quantity:number;unitPrice:number}>}>;
-  delivery:Record<string,string>; subtotal:number; taxRate:number; taxAmount:number; total:number; notificationSent:boolean; customerNotificationSent:boolean;
+  delivery:Record<string,string>; subtotal:number; taxRate:number; taxAmount:number; total:number; notificationSent:boolean; customerNotificationSent:boolean; loyaltyEligible:boolean;
 };

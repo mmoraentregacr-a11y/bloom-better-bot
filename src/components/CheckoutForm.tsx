@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { z } from "zod";
-import { User, Package, Calendar, CheckCircle2, MessageCircle, Printer } from "lucide-react";
+import { User, Package, Calendar, CheckCircle2, MessageCircle, Printer, LogIn } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
@@ -59,17 +59,22 @@ const initial: FormData = {
   hora: "",
   mensaje: "",
 };
+const CHECKOUT_DRAFT_KEY="golden-bloom-checkout-draft";
 
 const inputCls =
   "w-full bg-background border border-border rounded-md px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition";
 
 const CheckoutForm = ({ onCancel }: { onCancel: () => void }) => {
   const { items, clear } = useCart();
-  const { account, configured } = useAuth();
-  const [data, setData] = useState<FormData>(initial);
+  const { account, configured, login } = useAuth();
+  const [data, setData] = useState<FormData>(()=>{
+    try{return {...initial,...JSON.parse(sessionStorage.getItem(CHECKOUT_DRAFT_KEY)||"{}")};}
+    catch{return initial;}
+  });
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [submitting, setSubmitting] = useState(false);
   const [invoice, setInvoice] = useState<OrderInvoice | null>(null);
+  const [showGuestChoice,setShowGuestChoice]=useState(false);
 
   useEffect(()=>{
     if(!account)return;
@@ -80,36 +85,10 @@ const CheckoutForm = ({ onCancel }: { onCancel: () => void }) => {
   const set = <K extends keyof FormData>(k: K, v: FormData[K]) =>
     setData((d) => ({ ...d, [k]: v }));
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (items.length === 0) {
-      toast({ title: "Tu carrito está vacío", variant: "destructive" });
-      return;
-    }
-    const result = schema.safeParse(data);
-    if (!result.success) {
-      const errs: Partial<Record<keyof FormData, string>> = {};
-      for (const issue of result.error.issues) {
-        const k = issue.path[0] as keyof FormData;
-        if (!errs[k]) errs[k] = issue.message;
-      }
-      setErrors(errs);
-      toast({ title: "Revisa los campos del formulario", variant: "destructive" });
-      return;
-    }
-    setErrors({});
+  const createOrder = async (d:FormData,asGuest=false) => {
     setSubmitting(true);
-
-    if (configured && !account) {
-      toast({ title: "Inicia sesión para realizar tu pedido", description: "Así podrás acumular tus beneficios Golden Bloom.", variant: "destructive" });
-      setSubmitting(false);
-      return;
-    }
-
-    const d = result.data;
-    if (!account) { toast({ title:"Inicia sesión para guardar la solicitud", variant:"destructive" }); setSubmitting(false); return; }
     let created:OrderInvoice;
-    try { created=await customerApi.createOrder(account,{items,delivery:d}); }
+    try { created=asGuest?await customerApi.createGuestOrder({items,delivery:d}):await customerApi.createOrder(account!,{items,delivery:d}); }
     catch(error){toast({title:"No pudimos registrar el pedido",description:error instanceof Error?error.message:undefined,variant:"destructive"});setSubmitting(false);return;}
     const fmtCRC = (n: number) => `₡ ${n.toLocaleString("es-CR")}`;
     const lines: string[] = [];
@@ -132,27 +111,43 @@ const CheckoutForm = ({ onCancel }: { onCancel: () => void }) => {
     lines.push(`${d.fecha} · ${d.hora}`);
     lines.push("");
     lines.push("*🛒 Productos*");
-    created.items.forEach((it) => {
-      lines.push(`• ${it.name} x${it.quantity} — ${fmtCRC(it.lineSubtotal)}`);
-    });
+    created.items.forEach((it) => { lines.push(`• ${it.name} x${it.quantity} — ${fmtCRC(it.lineSubtotal)}`); });
     lines.push("");
     lines.push(`Subtotal sin IVA: ${fmtCRC(created.subtotal)}`);
     lines.push(`IVA incluido (${created.taxRate*100}%): ${fmtCRC(created.taxAmount)}`);
     lines.push(`*TOTAL: ${fmtCRC(created.total)}*`);
-    if (d.mensaje && d.mensaje.trim().length > 0) {
-      lines.push("");
-      lines.push("*📝 Mensaje / notas*");
-      lines.push(d.mensaje.trim());
-    }
-
+    if (d.mensaje && d.mensaje.trim().length > 0) { lines.push("", "*📝 Mensaje / notas*", d.mensaje.trim()); }
     sessionStorage.setItem("golden-bloom-order-whatsapp",lines.join("\n"));
     setInvoice(created);
     toast({title:"Solicitud creada",description:created.customerNotificationSent?"Enviamos una copia de la factura a tu correo.":"La factura fue creada, pero no pudimos enviar la copia por correo."});
     setSubmitting(false);
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (items.length === 0) {
+      toast({ title: "Tu carrito está vacío", variant: "destructive" });
+      return;
+    }
+    const result = schema.safeParse(data);
+    if (!result.success) {
+      const errs: Partial<Record<keyof FormData, string>> = {};
+      for (const issue of result.error.issues) {
+        const k = issue.path[0] as keyof FormData;
+        if (!errs[k]) errs[k] = issue.message;
+      }
+      setErrors(errs);
+      toast({ title: "Revisa los campos del formulario", variant: "destructive" });
+      return;
+    }
+    setErrors({});
+    const d = result.data;
+    if(!account){setShowGuestChoice(true);return;}
+    await createOrder(d);
+  };
+
   if(invoice){
-    const finish=()=>{clear();setData(initial);setInvoice(null);onCancel();};
+    const finish=()=>{clear();sessionStorage.removeItem(CHECKOUT_DRAFT_KEY);setData(initial);setInvoice(null);onCancel();};
     const whatsapp=()=>window.open(`https://wa.me/${ORDER_WHATSAPP}?text=${encodeURIComponent(sessionStorage.getItem("golden-bloom-order-whatsapp")||"")}`,"_blank","noopener,noreferrer");
     return <section className="space-y-6" aria-label="Orden de compra">
       <div className="text-center"><CheckCircle2 className="mx-auto text-primary" size={42}/><p className="text-xs tracking-[.3em] uppercase text-primary mt-3">Solicitud recibida</p><h3 className="font-serif text-3xl mt-2">Orden de compra</h3><p className="font-mono text-sm mt-1">{invoice.invoiceNumber}</p><p className="text-xs text-muted-foreground">{new Date(invoice.createdAt).toLocaleString("es-CR")}</p></div>
@@ -165,6 +160,7 @@ const CheckoutForm = ({ onCancel }: { onCancel: () => void }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
+      {showGuestChoice&&<div className="fixed inset-0 z-[100] bg-secondary/60 backdrop-blur-sm grid place-items-center p-5" role="dialog" aria-modal="true" aria-labelledby="guest-choice-title"><section className="bg-card shadow-elegant max-w-lg w-full p-8 text-center"><p className="text-xs tracking-[.3em] uppercase text-primary">Programa de lealtad</p><h3 id="guest-choice-title" className="font-serif text-3xl mt-3">¿Deseas acumular beneficios?</h3><p className="text-muted-foreground mt-4 leading-relaxed">Inicia sesión para sumar esta compra a tu tarjeta Golden Bloom. También puedes continuar sin beneficios y enviaremos normalmente la solicitud y la factura.</p><div className="grid gap-3 mt-7"><button type="button" disabled={!configured} onClick={()=>{sessionStorage.setItem(CHECKOUT_DRAFT_KEY,JSON.stringify(data));void login();}} className="bg-primary text-primary-foreground px-5 py-4 text-xs uppercase tracking-[.2em] inline-flex justify-center items-center gap-2 disabled:opacity-40"><LogIn size={16}/> Iniciar sesión y acumular</button><button type="button" onClick={()=>{setShowGuestChoice(false);void createOrder(data,true);}} className="border border-foreground/30 px-5 py-4 text-xs uppercase tracking-[.18em]">Continuar sin beneficios</button><button type="button" onClick={()=>setShowGuestChoice(false)} className="text-xs text-muted-foreground py-2">Volver al pedido</button></div></section></div>}
       {/* Solicitante */}
       <section className="space-y-3">
         <h3 className="flex items-center gap-2 font-serif text-xl">

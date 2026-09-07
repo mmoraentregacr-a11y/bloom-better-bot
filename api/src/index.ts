@@ -25,7 +25,17 @@ app.http("builderOptions", { methods: ["GET"], authLevel: "anonymous", route: "b
 
 async function secured(request: HttpRequest, handler: (identity: CustomerIdentity) => Promise<HttpResponseInit>) {
   try { return await handler(await authenticate(request)); }
-  catch (error) {
+  catch (error) { return serverError(error); }
+}
+
+async function optionallySecured(request: HttpRequest, handler: (identity?: CustomerIdentity) => Promise<HttpResponseInit>) {
+  try {
+    const hasToken=Boolean(request.headers.get("x-golden-bloom-authorization"));
+    return await handler(hasToken ? await authenticate(request) : undefined);
+  } catch (error) { return serverError(error); }
+}
+
+function serverError(error: unknown): HttpResponseInit {
     const message = error instanceof Error ? error.message : "UNKNOWN";
     if (message === "UNAUTHORIZED") return json({ message: "Debes iniciar sesión." }, 401);
     if (message === "FORBIDDEN") return json({ message: "No tienes acceso a este módulo." }, 403);
@@ -36,7 +46,6 @@ async function secured(request: HttpRequest, handler: (identity: CustomerIdentit
     if(/duplicate key|unique index|UX_Customers_Email/i.test(sqlMessage)) return json({message:"El correo está vinculado a otra cuenta de cliente. Cierra la sesión e ingresa nuevamente.",code:"CUSTOMER_EMAIL_CONFLICT",reference},409);
     const diagnostic=sqlMessage.replace(/(password|pwd|accesskey)\s*=\s*[^;\s]+/gi,"$1=[hidden]").slice(0,240);
     return json({ message: "Ocurrió un error en el servidor.", code:"SERVER_ERROR", reference, diagnostic }, 500);
-  }
 }
 
 app.http("me", { methods: ["GET"], authLevel: "anonymous", route: "me", handler: (request) => secured(request, async identity => {
@@ -53,14 +62,21 @@ app.http("me", { methods: ["GET"], authLevel: "anonymous", route: "me", handler:
   return json({ isAdmin:identity.admin, name: profile.name, email: profile.email, phone: profile.phone, loyalty: { completedPurchases: profile.purchase_count || 0, cycleSpend: money(profile.cycle_spend), freeShippingAvailable: profile.free_shipping, creditAvailable: money(profile.credit) }, orders: recordsets[1].map(o => ({ id:o.id, createdAt:o.created_at, total:money(o.total), status:o.status, itemCount:o.item_count })) });
 }) });
 
-app.http("orders", { methods: ["POST"], authLevel: "anonymous", route: "orders", handler: (request) => secured(request, async identity => {
+app.http("orders", { methods: ["POST"], authLevel: "anonymous", route: "orders", handler: (request) => optionallySecured(request, async identity => {
   type IncomingItem = { id:string; sku?:string; name:string; price?:number; quantity:number; configuration?:Array<{optionId:string;sku:string;name:string;quantity:number}> };
   const body = await request.json() as { items?: IncomingItem[]; delivery?: Record<string,string> };
   if (!body.items?.length || body.items.some(i => !i.id || !i.name?.trim() || i.name.length>240 || !Number.isInteger(i.quantity) || i.quantity<1 || i.quantity>100)) return json({ message: "El pedido no es válido." }, 400);
+  const guestName=String(body.delivery?.nombre||"").trim().slice(0,100);
+  const guestEmail=String(body.delivery?.email||"").trim().toLowerCase().slice(0,255);
+  if(!identity&&(!guestName||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail))) return json({message:"Completa un nombre y correo válidos para continuar sin iniciar sesión."},400);
   const pool = await database(); const tx = new sql.Transaction(pool); await tx.begin();
   try {
-    const accountPhone=String(body.delivery?.telefono||identity.phone||"").trim().slice(0,30)||null;
-    const customer=(await new sql.Request(tx).input("id",sql.NVarChar,identity.id).input("email",sql.NVarChar,identity.email).input("name",sql.NVarChar,identity.name).input("phone",sql.NVarChar,accountPhone).query(`DECLARE @customer nvarchar(128); SELECT TOP(1) @customer=id FROM Customers WITH(UPDLOCK,HOLDLOCK) WHERE email=@email; IF @customer IS NULL SELECT TOP(1) @customer=id FROM Customers WITH(UPDLOCK,HOLDLOCK) WHERE id=@id; IF @customer IS NULL BEGIN SET @customer=@id; INSERT Customers(id,email,name,phone) VALUES(@customer,@email,@name,@phone); END ELSE UPDATE Customers SET email=@email,name=@name,phone=COALESCE(NULLIF(@phone,''),phone) WHERE id=@customer; SELECT @customer id;`)).recordset[0].id;
+    const guestId=crypto.randomUUID();
+    const customerId=identity?.id||`guest:${guestId}`;
+    const customerEmail=identity?.email||`guest-${guestId}@guest.goldenbloom.invalid`;
+    const customerName=identity?.name||guestName;
+    const accountPhone=String(body.delivery?.telefono||identity?.phone||"").trim().slice(0,30)||null;
+    const customer=(await new sql.Request(tx).input("id",sql.NVarChar,customerId).input("email",sql.NVarChar,customerEmail).input("name",sql.NVarChar,customerName).input("phone",sql.NVarChar,accountPhone).query(`DECLARE @customer nvarchar(128); SELECT TOP(1) @customer=id FROM Customers WITH(UPDLOCK,HOLDLOCK) WHERE email=@email; IF @customer IS NULL SELECT TOP(1) @customer=id FROM Customers WITH(UPDLOCK,HOLDLOCK) WHERE id=@id; IF @customer IS NULL BEGIN SET @customer=@id; INSERT Customers(id,email,name,phone) VALUES(@customer,@email,@name,@phone); END ELSE UPDATE Customers SET email=@email,name=@name,phone=COALESCE(NULLIF(@phone,''),phone) WHERE id=@customer; SELECT @customer id;`)).recordset[0].id;
     const pricedItems: Array<IncomingItem & { unitPrice:number; displayName:string; resolved?:Array<{id:string;sku:string;name:string;quantity:number;unitPrice:number}> }> = [];
     for (const item of body.items) {
       if (item.sku === "CUSTOM-BOUQUET") {
@@ -104,8 +120,9 @@ app.http("orders", { methods: ["POST"], authLevel: "anonymous", route: "orders",
     }
     await tx.commit();
     const invoiceItems=pricedItems.map(item=>({sku:item.sku!,name:item.displayName,quantity:Math.floor(item.quantity),unitPrice:item.unitPrice,lineSubtotal:money(item.unitPrice*Math.floor(item.quantity)),configuration:item.resolved}));
-    let notificationSent=false; let customerNotificationSent=false; try{const sent=await notifyAdmins({invoiceNumber,createdAt,customer:{name:identity.name,email:identity.email},delivery:body.delivery||{},items:invoiceItems,subtotal,taxRate,taxAmount,total});notificationSent=sent.adminSent;customerNotificationSent=sent.customerSent;}catch(error){console.error("No se pudo enviar el correo del pedido",error);}
-    return json({id:orderId,invoiceNumber,createdAt,currency:"CRC",items:invoiceItems,delivery:body.delivery||{},subtotal,taxRate,taxAmount,total,notificationSent,customerNotificationSent},201);
+    const notificationCustomer={name:identity?.name||guestName,email:identity?.email||guestEmail};
+    let notificationSent=false; let customerNotificationSent=false; try{const sent=await notifyAdmins({invoiceNumber,createdAt,customer:notificationCustomer,delivery:body.delivery||{},items:invoiceItems,subtotal,taxRate,taxAmount,total});notificationSent=sent.adminSent;customerNotificationSent=sent.customerSent;}catch(error){console.error("No se pudo enviar el correo del pedido",error);}
+    return json({id:orderId,invoiceNumber,createdAt,currency:"CRC",items:invoiceItems,delivery:body.delivery||{},subtotal,taxRate,taxAmount,total,notificationSent,customerNotificationSent,loyaltyEligible:Boolean(identity)},201);
   } catch(error) { await tx.rollback(); throw error; }
 }) });
 
@@ -116,7 +133,9 @@ app.http("dashboardOrders", { methods:["GET"], authLevel:"anonymous", route:"das
   const status=["pending","paid","cancelled"].includes(requestedStatus)?requestedStatus:null;
   const pool=await database();
   const result=await pool.request().input("search",sql.NVarChar,search?`%${search}%`:null).input("status",sql.VarChar,status).query(`
-    SELECT TOP (100) o.id,o.invoice_number,o.created_at,o.paid_at,o.subtotal,o.tax_rate,o.tax_amount,o.total,o.status,o.delivery_json,c.id customer_id,c.name,c.email,c.phone,
+    SELECT TOP (100) o.id,o.invoice_number,o.created_at,o.paid_at,o.subtotal,o.tax_rate,o.tax_amount,o.total,o.status,o.delivery_json,c.id customer_id,
+      CASE WHEN c.id LIKE 'guest:%' THEN COALESCE(JSON_VALUE(o.delivery_json,'$.nombre'),c.name) ELSE c.name END name,
+      CASE WHEN c.id LIKE 'guest:%' THEN JSON_VALUE(o.delivery_json,'$.email') ELSE c.email END email,c.phone,
       COALESCE(l.purchase_count,0) purchase_count,
       JSON_QUERY((SELECT oi.sku,oi.name,oi.quantity,oi.unit_price,oi.configuration_json FROM OrderItems oi WHERE oi.order_id=o.id ORDER BY oi.id FOR JSON PATH)) items
     FROM Orders o JOIN Customers c ON c.id=o.customer_id LEFT JOIN Loyalty l ON l.customer_id=c.id
@@ -133,6 +152,10 @@ app.http("confirmDashboardOrder", { methods:["POST"], authLevel:"anonymous", rou
     const order=(await new sql.Request(tx).input("id",sql.UniqueIdentifier,id).query(`SELECT customer_id,total,status FROM Orders WITH(UPDLOCK,HOLDLOCK) WHERE id=@id`)).recordset[0];
     if (!order) { await tx.rollback(); return json({message:"Pedido no encontrado."},404); }
     if (order.status!=="pending") { await tx.rollback(); return json({message:"El pedido ya fue procesado."},409); }
+    if(String(order.customer_id).startsWith("guest:")) {
+      await new sql.Request(tx).input("id",sql.UniqueIdentifier,id).query(`UPDATE Orders SET status='paid',paid_at=SYSUTCDATETIME() WHERE id=@id`);
+      await tx.commit(); return json({ok:true,purchaseCount:null,loyaltyEligible:false});
+    }
     await new sql.Request(tx).input("customer",sql.NVarChar,order.customer_id).query(`IF NOT EXISTS(SELECT 1 FROM Loyalty WHERE customer_id=@customer) INSERT Loyalty(customer_id,purchase_count,cycle_spend) VALUES(@customer,0,0)`);
     const loyalty=(await new sql.Request(tx).input("customer",sql.NVarChar,order.customer_id).query(`SELECT purchase_count,cycle_spend FROM Loyalty WITH(UPDLOCK,HOLDLOCK) WHERE customer_id=@customer`)).recordset[0];
     const startingCount=loyalty.purchase_count>=10?0:loyalty.purchase_count; const startingSpend=loyalty.purchase_count>=10?0:Number(loyalty.cycle_spend); const count=startingCount+1; const spend=startingSpend+Number(order.total);
