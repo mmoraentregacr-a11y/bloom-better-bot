@@ -38,8 +38,14 @@ export const customerApi = {
   },
   dashboard: (account: AccountInfo) => authenticatedFetch<CustomerDashboard>(account, "/me"),
   createOrder: (account: AccountInfo, payload: { items: CartItem[]; delivery: Record<string, string> }) =>
-    authenticatedFetch<{ id: string; total: number }>(account, "/orders", {
+    authenticatedFetch<OrderInvoice>(account, "/orders", {
       method: "POST",
       body: JSON.stringify(payload),
     }),
+};
+
+export type OrderInvoice = {
+  id:string; invoiceNumber:string; createdAt:string; currency:"CRC";
+  items:Array<{sku:string;name:string;quantity:number;unitPrice:number;lineSubtotal:number;configuration?:Array<{sku:string;name:string;quantity:number;unitPrice:number}>}>;
+  delivery:Record<string,string>; subtotal:number; taxRate:number; taxAmount:number; total:number; notificationSent:boolean;
 };

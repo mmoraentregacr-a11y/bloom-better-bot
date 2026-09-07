@@ -1,6 +1,7 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { authenticate, CustomerIdentity } from "./auth.js";
 import { database, sql } from "./db.js";
+import { notifyAdmins } from "./email.js";
 
 const json = (body: unknown, status = 200): HttpResponseInit => ({ status, jsonBody: body });
 const money = (value: unknown) => Math.round(Number(value) * 100) / 100;
@@ -77,14 +78,21 @@ app.http("orders", { methods: ["POST"], authLevel: "anonymous", route: "orders",
         pricedItems.push({...item,unitPrice:money(product.price),displayName:product.name});
       }
     }
-    const total=money(pricedItems.reduce((sum,item)=>sum+item.unitPrice*Math.floor(item.quantity),0));
+    const subtotal=money(pricedItems.reduce((sum,item)=>sum+item.unitPrice*Math.floor(item.quantity),0));
+    const configuredTaxRate=Number(process.env.IVA_RATE||"0.13");
+    const taxRate=Number.isFinite(configuredTaxRate)&&configuredTaxRate>=0&&configuredTaxRate<=1?configuredTaxRate:0.13;
+    const taxAmount=money(subtotal*taxRate); const total=money(subtotal+taxAmount);
     const orderId = crypto.randomUUID();
-    await new sql.Request(tx).input("id",sql.UniqueIdentifier,orderId).input("customer",sql.NVarChar,identity.id).input("total",sql.Decimal(12,2),total).input("delivery",sql.NVarChar,JSON.stringify(body.delivery || {})).query(`INSERT Orders(id,customer_id,total,status,delivery_json) VALUES(@id,@customer,@total,'pending',@delivery)`);
+    const invoiceNumber=`GB-${new Date().toISOString().slice(0,10).replaceAll("-","")}-${orderId.slice(0,8).toUpperCase()}`; const createdAt=new Date().toISOString();
+    await new sql.Request(tx).input("id",sql.UniqueIdentifier,orderId).input("customer",sql.NVarChar,identity.id).input("invoice",sql.VarChar,invoiceNumber).input("subtotal",sql.Decimal(12,2),subtotal).input("taxRate",sql.Decimal(6,5),taxRate).input("taxAmount",sql.Decimal(12,2),taxAmount).input("total",sql.Decimal(12,2),total).input("delivery",sql.NVarChar,JSON.stringify(body.delivery||{})).query(`INSERT Orders(id,customer_id,invoice_number,subtotal,tax_rate,tax_amount,total,status,delivery_json) VALUES(@id,@customer,@invoice,@subtotal,@taxRate,@taxAmount,@total,'pending',@delivery)`);
     for (const item of pricedItems) {
       const inserted=await new sql.Request(tx).input("order",sql.UniqueIdentifier,orderId).input("product",sql.NVarChar,item.id).input("sku",sql.VarChar,item.sku).input("name",sql.NVarChar,item.displayName).input("price",sql.Decimal(12,2),item.unitPrice).input("qty",sql.Int,Math.floor(item.quantity)).input("config",sql.NVarChar,item.resolved?JSON.stringify(item.resolved):null).query(`INSERT OrderItems(order_id,product_id,sku,name,unit_price,quantity,configuration_json) OUTPUT INSERTED.id VALUES(@order,@product,@sku,@name,@price,@qty,@config)`);
       if(item.resolved) for(const option of item.resolved) await new sql.Request(tx).input("orderItem",sql.BigInt,inserted.recordset[0].id).input("option",sql.UniqueIdentifier,option.id).input("sku",sql.VarChar,option.sku).input("name",sql.NVarChar,option.name).input("qty",sql.Int,option.quantity).input("price",sql.Decimal(12,2),option.unitPrice).query(`INSERT CustomBouquetItems(order_item_id,builder_option_id,sku,name,quantity,unit_price) VALUES(@orderItem,@option,@sku,@name,@qty,@price)`);
     }
-    await tx.commit(); return json({ id: orderId, total }, 201);
+    await tx.commit();
+    const invoiceItems=pricedItems.map(item=>({sku:item.sku!,name:item.displayName,quantity:Math.floor(item.quantity),unitPrice:item.unitPrice,lineSubtotal:money(item.unitPrice*Math.floor(item.quantity)),configuration:item.resolved}));
+    let notificationSent=false; try{notificationSent=await notifyAdmins({invoiceNumber,createdAt,customer:{name:identity.name,email:identity.email},delivery:body.delivery||{},items:invoiceItems,subtotal,taxRate,taxAmount,total});}catch(error){console.error("No se pudo enviar el correo del pedido",error);}
+    return json({id:orderId,invoiceNumber,createdAt,currency:"CRC",items:invoiceItems,delivery:body.delivery||{},subtotal,taxRate,taxAmount,total,notificationSent},201);
   } catch(error) { await tx.rollback(); throw error; }
 }) });
 
@@ -95,11 +103,11 @@ app.http("adminOrders", { methods:["GET"], authLevel:"anonymous", route:"admin/o
   const status=["pending","paid","cancelled"].includes(requestedStatus)?requestedStatus:null;
   const pool=await database();
   const result=await pool.request().input("search",sql.NVarChar,search?`%${search}%`:null).input("status",sql.VarChar,status).query(`
-    SELECT TOP (100) o.id,o.created_at,o.paid_at,o.total,o.status,o.delivery_json,c.id customer_id,c.name,c.email,c.phone,
+    SELECT TOP (100) o.id,o.invoice_number,o.created_at,o.paid_at,o.subtotal,o.tax_rate,o.tax_amount,o.total,o.status,o.delivery_json,c.id customer_id,c.name,c.email,c.phone,
       COALESCE(l.purchase_count,0) purchase_count,
       JSON_QUERY((SELECT oi.sku,oi.name,oi.quantity,oi.unit_price,oi.configuration_json FROM OrderItems oi WHERE oi.order_id=o.id ORDER BY oi.id FOR JSON PATH)) items
     FROM Orders o JOIN Customers c ON c.id=o.customer_id LEFT JOIN Loyalty l ON l.customer_id=c.id
-    WHERE (@status IS NULL OR o.status=@status) AND (@search IS NULL OR c.name LIKE @search OR c.email LIKE @search OR c.phone LIKE @search OR CONVERT(varchar(36),o.id) LIKE @search OR EXISTS(SELECT 1 FROM OrderItems oi WHERE oi.order_id=o.id AND (oi.sku LIKE @search OR oi.name LIKE @search)))
+    WHERE (@status IS NULL OR o.status=@status) AND (@search IS NULL OR c.name LIKE @search OR c.email LIKE @search OR c.phone LIKE @search OR o.invoice_number LIKE @search OR CONVERT(varchar(36),o.id) LIKE @search OR EXISTS(SELECT 1 FROM OrderItems oi WHERE oi.order_id=o.id AND (oi.sku LIKE @search OR oi.name LIKE @search)))
     ORDER BY CASE WHEN o.status='pending' THEN 0 ELSE 1 END,o.created_at DESC;
     SELECT COUNT(*) total,SUM(CASE WHEN status='pending' THEN 1 ELSE 0 END) pending,SUM(CASE WHEN status='paid' THEN 1 ELSE 0 END) paid,SUM(CASE WHEN status='cancelled' THEN 1 ELSE 0 END) cancelled FROM Orders;`);
   const sets=result.recordsets as sql.IRecordSet<Record<string,unknown>>[];

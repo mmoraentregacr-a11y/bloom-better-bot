@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { z } from "zod";
-import { User, Package, Calendar } from "lucide-react";
+import { User, Package, Calendar, CheckCircle2, MessageCircle, Printer } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
-import { customerApi } from "@/lib/api";
+import { customerApi, type OrderInvoice } from "@/lib/api";
 
 const PROVINCIAS = [
   "San José",
@@ -64,11 +64,12 @@ const inputCls =
   "w-full bg-background border border-border rounded-md px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition";
 
 const CheckoutForm = ({ onCancel }: { onCancel: () => void }) => {
-  const { items, total, clear } = useCart();
+  const { items, clear } = useCart();
   const { account, configured } = useAuth();
   const [data, setData] = useState<FormData>(initial);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [invoice, setInvoice] = useState<OrderInvoice | null>(null);
 
   const set = <K extends keyof FormData>(k: K, v: FormData[K]) =>
     setData((d) => ({ ...d, [k]: v }));
@@ -100,23 +101,14 @@ const CheckoutForm = ({ onCancel }: { onCancel: () => void }) => {
     }
 
     const d = result.data;
-    let orderId = "";
-    let registeredTotal = total;
-    if (account) {
-      try {
-        const created = await customerApi.createOrder(account, { items, delivery: d });
-        orderId = created.id;
-        registeredTotal = created.total;
-      } catch (error) {
-        toast({ title: "No pudimos registrar el pedido", description: error instanceof Error ? error.message : undefined, variant: "destructive" });
-        setSubmitting(false);
-        return;
-      }
-    }
+    if (!account) { toast({ title:"Inicia sesión para guardar la solicitud", variant:"destructive" }); setSubmitting(false); return; }
+    let created:OrderInvoice;
+    try { created=await customerApi.createOrder(account,{items,delivery:d}); }
+    catch(error){toast({title:"No pudimos registrar el pedido",description:error instanceof Error?error.message:undefined,variant:"destructive"});setSubmitting(false);return;}
     const fmtCRC = (n: number) => `₡ ${n.toLocaleString("es-CR")}`;
     const lines: string[] = [];
     lines.push("*🌸 NUEVO PEDIDO — GOLDEN BLOOM*");
-    if (orderId) lines.push(`Pedido: ${orderId}`);
+    lines.push(`Orden: ${created.invoiceNumber}`);
     lines.push("");
     lines.push("*👤 Solicitante*");
     lines.push(`Nombre: ${d.nombre}`);
@@ -134,27 +126,36 @@ const CheckoutForm = ({ onCancel }: { onCancel: () => void }) => {
     lines.push(`${d.fecha} · ${d.hora}`);
     lines.push("");
     lines.push("*🛒 Productos*");
-    items.forEach((it) => {
-      lines.push(`• ${it.name} x${it.quantity} — ${fmtCRC(it.price * it.quantity)}`);
+    created.items.forEach((it) => {
+      lines.push(`• ${it.name} x${it.quantity} — ${fmtCRC(it.lineSubtotal)}`);
     });
     lines.push("");
-    lines.push(`*TOTAL: ${fmtCRC(registeredTotal)}*`);
+    lines.push(`Subtotal: ${fmtCRC(created.subtotal)}`);
+    lines.push(`IVA (${created.taxRate*100}%): ${fmtCRC(created.taxAmount)}`);
+    lines.push(`*TOTAL: ${fmtCRC(created.total)}*`);
     if (d.mensaje && d.mensaje.trim().length > 0) {
       lines.push("");
       lines.push("*📝 Mensaje / notas*");
       lines.push(d.mensaje.trim());
     }
 
-    const text = encodeURIComponent(lines.join("\n"));
-    const url = `https://wa.me/${ORDER_WHATSAPP}?text=${text}`;
-
-    window.open(url, "_blank", "noopener,noreferrer");
-    toast({ title: "Pedido enviado por WhatsApp", description: "Te confirmaremos en breve." });
-    clear();
-    setData(initial);
+    sessionStorage.setItem("golden-bloom-order-whatsapp",lines.join("\n"));
+    setInvoice(created);
+    toast({title:"Solicitud creada",description:created.notificationSent?"La factura fue creada y el administrador recibió el correo.":"La factura fue creada. El correo administrativo está pendiente de configuración."});
     setSubmitting(false);
-    onCancel();
   };
+
+  if(invoice){
+    const finish=()=>{clear();setData(initial);setInvoice(null);onCancel();};
+    const whatsapp=()=>window.open(`https://wa.me/${ORDER_WHATSAPP}?text=${encodeURIComponent(sessionStorage.getItem("golden-bloom-order-whatsapp")||"")}`,"_blank","noopener,noreferrer");
+    return <section className="space-y-6" aria-label="Orden de compra">
+      <div className="text-center"><CheckCircle2 className="mx-auto text-primary" size={42}/><p className="text-xs tracking-[.3em] uppercase text-primary mt-3">Solicitud recibida</p><h3 className="font-serif text-3xl mt-2">Orden de compra</h3><p className="font-mono text-sm mt-1">{invoice.invoiceNumber}</p><p className="text-xs text-muted-foreground">{new Date(invoice.createdAt).toLocaleString("es-CR")}</p></div>
+      <div className="border border-border bg-card p-5 space-y-4"><div className="grid grid-cols-[1fr_auto_auto] gap-3 text-[10px] uppercase tracking-wider text-muted-foreground"><span>Detalle</span><span>Cant.</span><span>Importe</span></div>{invoice.items.map((item,index)=><div key={`${item.sku}-${index}`} className="grid grid-cols-[1fr_auto_auto] gap-3 border-t border-border pt-3 text-sm"><div><strong>{item.name}</strong><p className="text-xs text-muted-foreground">{item.sku} · {fmtCRC(item.unitPrice)} c/u</p>{item.configuration?.map(option=><p key={option.sku} className="text-xs text-muted-foreground mt-1">↳ {option.quantity} × {option.name} ({fmtCRC(option.unitPrice)} c/u)</p>)}</div><span>{item.quantity}</span><span className="tabular-nums">{fmtCRC(item.lineSubtotal)}</span></div>)}<dl className="border-t border-border pt-4 space-y-2 text-sm"><div className="flex justify-between"><dt>Subtotal</dt><dd>{fmtCRC(invoice.subtotal)}</dd></div><div className="flex justify-between"><dt>IVA ({invoice.taxRate*100}%)</dt><dd>{fmtCRC(invoice.taxAmount)}</dd></div><div className="flex justify-between font-serif text-xl text-primary"><dt>Total</dt><dd>{fmtCRC(invoice.total)}</dd></div></dl></div>
+      <p className={`text-xs border p-3 ${invoice.notificationSent?"border-primary/30":"border-amber-500/40"}`}>{invoice.notificationSent?"Los administradores recibieron esta solicitud por correo y ya aparece en su panel.":"La solicitud ya aparece en el panel administrativo. Falta configurar el servicio de correo en Azure para enviar la notificación."}</p>
+      <div className="grid sm:grid-cols-2 gap-3"><button type="button" onClick={()=>window.print()} className="border border-foreground/30 px-4 py-3 text-xs uppercase tracking-wider inline-flex justify-center items-center gap-2"><Printer size={15}/> Imprimir / PDF</button><button type="button" onClick={whatsapp} className="border border-foreground/30 px-4 py-3 text-xs uppercase tracking-wider inline-flex justify-center items-center gap-2"><MessageCircle size={15}/> WhatsApp</button></div>
+      <button type="button" onClick={finish} className="w-full bg-primary text-primary-foreground px-5 py-4 text-xs uppercase tracking-[.25em]">Finalizar</button>
+    </section>;
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
@@ -294,7 +295,7 @@ const CheckoutForm = ({ onCancel }: { onCancel: () => void }) => {
           disabled={submitting}
           className="flex-[2] bg-primary text-primary-foreground px-4 sm:px-6 py-4 text-xs tracking-widest sm:tracking-[0.3em] uppercase hover:bg-primary/90 transition-colors disabled:opacity-60 whitespace-normal leading-relaxed"
         >
-          {submitting ? "Enviando..." : "Generar pedido por WhatsApp"}
+          {submitting ? "Creando orden..." : "Crear orden de compra"}
         </button>
       </div>
     </form>
