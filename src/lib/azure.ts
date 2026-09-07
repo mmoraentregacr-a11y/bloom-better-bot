@@ -1,6 +1,5 @@
 import {
   AccountInfo,
-  AuthenticationResult,
   PublicClientApplication,
 } from "@azure/msal-browser";
 
@@ -35,13 +34,13 @@ export const msal = new PublicClientApplication({
 
 const scopes = apiClientId ? [`api://${apiClientId}/access_as_user`] : [];
 
-export async function signIn(): Promise<AuthenticationResult> {
+export async function signIn(): Promise<void> {
   if (!azureConfigured) throw new Error("Azure todavía no está configurado.");
-  return msal.loginPopup({ scopes, prompt: "select_account" });
+  await msal.loginRedirect({ scopes, prompt: "select_account" });
 }
 
 export async function signOut(account?: AccountInfo) {
-  await msal.logoutPopup({ account });
+  await msal.logoutRedirect({ account, postLogoutRedirectUri: window.location.origin });
 }
 
 export async function accessToken(account: AccountInfo): Promise<string> {

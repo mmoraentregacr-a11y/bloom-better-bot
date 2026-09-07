@@ -22,7 +22,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const initializeAuth = async () => {
       try {
         await msal.initialize();
-        const active = msal.getActiveAccount() || msal.getAllAccounts()[0] || null;
+        let redirectAccount: AccountInfo | null = null;
+        try {
+          redirectAccount = (await msal.handleRedirectPromise())?.account || null;
+        } catch (error) {
+          console.warn("No se pudo restaurar una redirección anterior.", error);
+        }
+        const active = redirectAccount || msal.getActiveAccount() || msal.getAllAccounts()[0] || null;
         if (active) msal.setActiveAccount(active);
         if (mounted) setAccount(active);
       } catch (error) {
@@ -41,9 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     ready,
     configured: azureConfigured,
     login: async () => {
-      const result = await signIn();
-      msal.setActiveAccount(result.account);
-      setAccount(result.account);
+      await signIn();
     },
     logout: async () => {
       await signOut(account || undefined);
