@@ -44,7 +44,7 @@ const CollectionPage = ({ eyebrow, title, description, heroImage, products, cata
         {liveCatalog.isLoading && <p className="col-span-full text-center text-muted-foreground">Cargando catálogo…</p>}
         {liveCatalog.isError && <p className="col-span-full text-center text-destructive">No pudimos cargar los productos.</p>}
         {displayedProducts.map((p, i) => (
-          <ProductCard key={p.id || p.name + i} product={p} />
+          <ProductCard key={`${p.id || p.name}-${i}`} product={p} />
         ))}
       </div>
     </section>

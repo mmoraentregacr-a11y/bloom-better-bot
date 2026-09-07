@@ -36,9 +36,8 @@ async function secured(request: HttpRequest, handler: (identity: CustomerIdentit
 
 app.http("me", { methods: ["GET"], authLevel: "anonymous", route: "me", handler: (request) => secured(request, async identity => {
   const pool = await database();
-  await pool.request().input("id", sql.NVarChar, identity.id).input("email", sql.NVarChar, identity.email).input("name", sql.NVarChar, identity.name)
-    .query(`MERGE Customers AS target USING (SELECT @id AS id) AS source ON target.id=source.id WHEN MATCHED THEN UPDATE SET email=@email,name=@name WHEN NOT MATCHED THEN INSERT(id,email,name) VALUES(@id,@email,@name);`);
-  const result = await pool.request().input("id", sql.NVarChar, identity.id).query(`
+  const customer=(await pool.request().input("id",sql.NVarChar,identity.id).input("email",sql.NVarChar,identity.email).input("name",sql.NVarChar,identity.name).query(`DECLARE @customer nvarchar(128); SELECT TOP(1) @customer=id FROM Customers WHERE id=@id OR email=@email ORDER BY CASE WHEN id=@id THEN 0 ELSE 1 END; IF @customer IS NULL BEGIN SET @customer=@id; INSERT Customers(id,email,name) VALUES(@customer,@email,@name); END ELSE UPDATE Customers SET email=@email,name=@name WHERE id=@customer; SELECT @customer id;`)).recordset[0].id;
+  const result = await pool.request().input("id", sql.NVarChar, customer).query(`
     SELECT c.name,c.email,c.phone,l.purchase_count,l.cycle_spend,
       CAST(CASE WHEN EXISTS(SELECT 1 FROM Benefits b WHERE b.customer_id=c.id AND b.kind='free_shipping' AND b.redeemed_at IS NULL) THEN 1 ELSE 0 END AS bit) free_shipping,
       COALESCE((SELECT SUM(amount) FROM Benefits b WHERE b.customer_id=c.id AND b.kind='credit' AND b.redeemed_at IS NULL),0) credit
@@ -55,7 +54,7 @@ app.http("orders", { methods: ["POST"], authLevel: "anonymous", route: "orders",
   if (!body.items?.length || body.items.some(i => !i.id || !i.name || !i.sku || i.quantity < 1)) return json({ message: "El pedido no es válido." }, 400);
   const pool = await database(); const tx = new sql.Transaction(pool); await tx.begin();
   try {
-    await new sql.Request(tx).input("id",sql.NVarChar,identity.id).input("email",sql.NVarChar,identity.email).input("name",sql.NVarChar,identity.name).query(`MERGE Customers AS t USING(SELECT @id id)s ON t.id=s.id WHEN MATCHED THEN UPDATE SET email=@email,name=@name WHEN NOT MATCHED THEN INSERT(id,email,name) VALUES(@id,@email,@name);`);
+    const customer=(await new sql.Request(tx).input("id",sql.NVarChar,identity.id).input("email",sql.NVarChar,identity.email).input("name",sql.NVarChar,identity.name).query(`DECLARE @customer nvarchar(128); SELECT TOP(1) @customer=id FROM Customers WITH(UPDLOCK,HOLDLOCK) WHERE id=@id OR email=@email ORDER BY CASE WHEN id=@id THEN 0 ELSE 1 END; IF @customer IS NULL BEGIN SET @customer=@id; INSERT Customers(id,email,name) VALUES(@customer,@email,@name); END ELSE UPDATE Customers SET email=@email,name=@name WHERE id=@customer; SELECT @customer id;`)).recordset[0].id;
     const pricedItems: Array<IncomingItem & { unitPrice:number; displayName:string; resolved?:Array<{id:string;sku:string;name:string;quantity:number;unitPrice:number}> }> = [];
     for (const item of body.items) {
       if (item.sku === "CUSTOM-BOUQUET") {
@@ -84,7 +83,7 @@ app.http("orders", { methods: ["POST"], authLevel: "anonymous", route: "orders",
     const taxAmount=money(subtotal*taxRate); const total=money(subtotal+taxAmount);
     const orderId = crypto.randomUUID();
     const invoiceNumber=`GB-${new Date().toISOString().slice(0,10).replaceAll("-","")}-${orderId.slice(0,8).toUpperCase()}`; const createdAt=new Date().toISOString();
-    await new sql.Request(tx).input("id",sql.UniqueIdentifier,orderId).input("customer",sql.NVarChar,identity.id).input("invoice",sql.VarChar,invoiceNumber).input("subtotal",sql.Decimal(12,2),subtotal).input("taxRate",sql.Decimal(6,5),taxRate).input("taxAmount",sql.Decimal(12,2),taxAmount).input("total",sql.Decimal(12,2),total).input("delivery",sql.NVarChar,JSON.stringify(body.delivery||{})).query(`INSERT Orders(id,customer_id,invoice_number,subtotal,tax_rate,tax_amount,total,status,delivery_json) VALUES(@id,@customer,@invoice,@subtotal,@taxRate,@taxAmount,@total,'pending',@delivery)`);
+    await new sql.Request(tx).input("id",sql.UniqueIdentifier,orderId).input("customer",sql.NVarChar,customer).input("invoice",sql.VarChar,invoiceNumber).input("subtotal",sql.Decimal(12,2),subtotal).input("taxRate",sql.Decimal(6,5),taxRate).input("taxAmount",sql.Decimal(12,2),taxAmount).input("total",sql.Decimal(12,2),total).input("delivery",sql.NVarChar,JSON.stringify(body.delivery||{})).query(`INSERT Orders(id,customer_id,invoice_number,subtotal,tax_rate,tax_amount,total,status,delivery_json) VALUES(@id,@customer,@invoice,@subtotal,@taxRate,@taxAmount,@total,'pending',@delivery)`);
     for (const item of pricedItems) {
       const inserted=await new sql.Request(tx).input("order",sql.UniqueIdentifier,orderId).input("product",sql.NVarChar,item.id).input("sku",sql.VarChar,item.sku).input("name",sql.NVarChar,item.displayName).input("price",sql.Decimal(12,2),item.unitPrice).input("qty",sql.Int,Math.floor(item.quantity)).input("config",sql.NVarChar,item.resolved?JSON.stringify(item.resolved):null).query(`INSERT OrderItems(order_id,product_id,sku,name,unit_price,quantity,configuration_json) OUTPUT INSERTED.id VALUES(@order,@product,@sku,@name,@price,@qty,@config)`);
       if(item.resolved) for(const option of item.resolved) await new sql.Request(tx).input("orderItem",sql.BigInt,inserted.recordset[0].id).input("option",sql.UniqueIdentifier,option.id).input("sku",sql.VarChar,option.sku).input("name",sql.NVarChar,option.name).input("qty",sql.Int,option.quantity).input("price",sql.Decimal(12,2),option.unitPrice).query(`INSERT CustomBouquetItems(order_item_id,builder_option_id,sku,name,quantity,unit_price) VALUES(@orderItem,@option,@sku,@name,@qty,@price)`);
