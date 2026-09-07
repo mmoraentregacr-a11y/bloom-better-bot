@@ -34,7 +34,8 @@ async function secured(request: HttpRequest, handler: (identity: CustomerIdentit
     const sqlMessage=error instanceof Error?error.message:"";
     if(/Invalid column name|invoice_number|tax_amount|tax_rate/i.test(sqlMessage)) return json({message:"Falta aplicar la actualización de facturación en la base de datos.",code:"DATABASE_SCHEMA_OUTDATED",reference},503);
     if(/duplicate key|unique index|UX_Customers_Email/i.test(sqlMessage)) return json({message:"El correo está vinculado a otra cuenta de cliente. Cierra la sesión e ingresa nuevamente.",code:"CUSTOMER_EMAIL_CONFLICT",reference},409);
-    return json({ message: "Ocurrió un error en el servidor.", code:"SERVER_ERROR", reference }, 500);
+    const diagnostic=sqlMessage.replace(/(password|pwd|accesskey)\s*=\s*[^;\s]+/gi,"$1=[hidden]").slice(0,240);
+    return json({ message: "Ocurrió un error en el servidor.", code:"SERVER_ERROR", reference, diagnostic }, 500);
   }
 }
 
