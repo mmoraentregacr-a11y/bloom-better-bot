@@ -41,7 +41,7 @@ async function secured(request: HttpRequest, handler: (identity: CustomerIdentit
 
 app.http("me", { methods: ["GET"], authLevel: "anonymous", route: "me", handler: (request) => secured(request, async identity => {
   const pool = await database();
-  const customer=(await pool.request().input("id",sql.NVarChar,identity.id).input("email",sql.NVarChar,identity.email).input("name",sql.NVarChar,identity.name).query(`DECLARE @customer nvarchar(128); SELECT TOP(1) @customer=id FROM Customers WHERE email=@email; IF @customer IS NULL SELECT TOP(1) @customer=id FROM Customers WHERE id=@id; IF @customer IS NULL BEGIN SET @customer=@id; INSERT Customers(id,email,name) VALUES(@customer,@email,@name); END ELSE UPDATE Customers SET email=@email,name=@name WHERE id=@customer; SELECT @customer id;`)).recordset[0].id;
+  const customer=(await pool.request().input("id",sql.NVarChar,identity.id).input("email",sql.NVarChar,identity.email).input("name",sql.NVarChar,identity.name).input("phone",sql.NVarChar,identity.phone||null).query(`DECLARE @customer nvarchar(128); SELECT TOP(1) @customer=id FROM Customers WHERE email=@email; IF @customer IS NULL SELECT TOP(1) @customer=id FROM Customers WHERE id=@id; IF @customer IS NULL BEGIN SET @customer=@id; INSERT Customers(id,email,name,phone) VALUES(@customer,@email,@name,@phone); END ELSE UPDATE Customers SET email=@email,name=@name,phone=COALESCE(NULLIF(@phone,''),phone) WHERE id=@customer; SELECT @customer id;`)).recordset[0].id;
   const result = await pool.request().input("id", sql.NVarChar, customer).query(`
     SELECT c.name,c.email,c.phone,l.purchase_count,l.cycle_spend,
       CAST(CASE WHEN EXISTS(SELECT 1 FROM Benefits b WHERE b.customer_id=c.id AND b.kind='free_shipping' AND b.redeemed_at IS NULL) THEN 1 ELSE 0 END AS bit) free_shipping,
@@ -59,7 +59,8 @@ app.http("orders", { methods: ["POST"], authLevel: "anonymous", route: "orders",
   if (!body.items?.length || body.items.some(i => !i.id || !i.name?.trim() || i.name.length>240 || !Number.isInteger(i.quantity) || i.quantity<1 || i.quantity>100)) return json({ message: "El pedido no es válido." }, 400);
   const pool = await database(); const tx = new sql.Transaction(pool); await tx.begin();
   try {
-    const customer=(await new sql.Request(tx).input("id",sql.NVarChar,identity.id).input("email",sql.NVarChar,identity.email).input("name",sql.NVarChar,identity.name).query(`DECLARE @customer nvarchar(128); SELECT TOP(1) @customer=id FROM Customers WITH(UPDLOCK,HOLDLOCK) WHERE email=@email; IF @customer IS NULL SELECT TOP(1) @customer=id FROM Customers WITH(UPDLOCK,HOLDLOCK) WHERE id=@id; IF @customer IS NULL BEGIN SET @customer=@id; INSERT Customers(id,email,name) VALUES(@customer,@email,@name); END ELSE UPDATE Customers SET email=@email,name=@name WHERE id=@customer; SELECT @customer id;`)).recordset[0].id;
+    const accountPhone=String(body.delivery?.telefono||identity.phone||"").trim().slice(0,30)||null;
+    const customer=(await new sql.Request(tx).input("id",sql.NVarChar,identity.id).input("email",sql.NVarChar,identity.email).input("name",sql.NVarChar,identity.name).input("phone",sql.NVarChar,accountPhone).query(`DECLARE @customer nvarchar(128); SELECT TOP(1) @customer=id FROM Customers WITH(UPDLOCK,HOLDLOCK) WHERE email=@email; IF @customer IS NULL SELECT TOP(1) @customer=id FROM Customers WITH(UPDLOCK,HOLDLOCK) WHERE id=@id; IF @customer IS NULL BEGIN SET @customer=@id; INSERT Customers(id,email,name,phone) VALUES(@customer,@email,@name,@phone); END ELSE UPDATE Customers SET email=@email,name=@name,phone=COALESCE(NULLIF(@phone,''),phone) WHERE id=@customer; SELECT @customer id;`)).recordset[0].id;
     const pricedItems: Array<IncomingItem & { unitPrice:number; displayName:string; resolved?:Array<{id:string;sku:string;name:string;quantity:number;unitPrice:number}> }> = [];
     for (const item of body.items) {
       if (item.sku === "CUSTOM-BOUQUET") {
@@ -100,8 +101,8 @@ app.http("orders", { methods: ["POST"], authLevel: "anonymous", route: "orders",
     }
     await tx.commit();
     const invoiceItems=pricedItems.map(item=>({sku:item.sku!,name:item.displayName,quantity:Math.floor(item.quantity),unitPrice:item.unitPrice,lineSubtotal:money(item.unitPrice*Math.floor(item.quantity)),configuration:item.resolved}));
-    let notificationSent=false; try{notificationSent=await notifyAdmins({invoiceNumber,createdAt,customer:{name:identity.name,email:identity.email},delivery:body.delivery||{},items:invoiceItems,subtotal,taxRate,taxAmount,total});}catch(error){console.error("No se pudo enviar el correo del pedido",error);}
-    return json({id:orderId,invoiceNumber,createdAt,currency:"CRC",items:invoiceItems,delivery:body.delivery||{},subtotal,taxRate,taxAmount,total,notificationSent},201);
+    let notificationSent=false; let customerNotificationSent=false; try{const sent=await notifyAdmins({invoiceNumber,createdAt,customer:{name:identity.name,email:identity.email},delivery:body.delivery||{},items:invoiceItems,subtotal,taxRate,taxAmount,total});notificationSent=sent.adminSent;customerNotificationSent=sent.customerSent;}catch(error){console.error("No se pudo enviar el correo del pedido",error);}
+    return json({id:orderId,invoiceNumber,createdAt,currency:"CRC",items:invoiceItems,delivery:body.delivery||{},subtotal,taxRate,taxAmount,total,notificationSent,customerNotificationSent},201);
   } catch(error) { await tx.rollback(); throw error; }
 }) });
 

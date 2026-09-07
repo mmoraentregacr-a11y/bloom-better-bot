@@ -1,7 +1,7 @@
 import { HttpRequest } from "@azure/functions";
 import { createRemoteJWKSet, jwtVerify, JWTPayload } from "jose";
 
-export type CustomerIdentity = { id: string; email: string; name: string; admin: boolean };
+export type CustomerIdentity = { id: string; email: string; name: string; phone?: string; admin: boolean };
 
 let jwks: ReturnType<typeof createRemoteJWKSet> | undefined;
 
@@ -27,5 +27,7 @@ function identityFromClaims(claims: JWTPayload): CustomerIdentity {
   const id = String(claims.oid || claims.sub || "");
   if (!id || !email) throw new Error("UNAUTHORIZED");
   const admins = (process.env.ADMIN_EMAILS || "").toLowerCase().split(",").map(v => v.trim()).filter(Boolean);
-  return { id, email, name: String(claims.name || email.split("@")[0]), admin: admins.includes(email) };
+  const customPhone=Object.entries(claims).find(([key,value])=>/phone/i.test(key)&&typeof value==="string")?.[1];
+  const phone=String(claims.phone_number||customPhone||"").trim()||undefined;
+  return { id, email, name: String(claims.name || email.split("@")[0]), phone, admin: admins.includes(email) };
 }
