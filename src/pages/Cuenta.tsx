@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { LayoutDashboard, LogIn, LogOut, Package } from "lucide-react";
 import PageLayout from "@/components/PageLayout";
 import LoyaltyCard from "@/components/LoyaltyCard";
@@ -35,6 +35,10 @@ const Cuenta = () => {
         </main>
       </PageLayout>
     );
+  }
+
+  if (dashboard.data?.isAdmin) {
+    return <Navigate to="/admin/pedidos" replace />;
   }
 
   return (
