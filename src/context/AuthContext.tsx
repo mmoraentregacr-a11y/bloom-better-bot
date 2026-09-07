@@ -22,17 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const initializeAuth = async () => {
       try {
         await msal.initialize();
-        let redirectAccount: AccountInfo | null = null;
-
-        try {
-          redirectAccount = (await msal.handleRedirectPromise())?.account || null;
-        } catch (error) {
-          // Popup sign-in can leave a stale redirect entry during local HMR.
-          // It is safe to continue with the account already stored by MSAL.
-          console.warn("No se pudo restaurar la redirección de inicio de sesión.", error);
-        }
-
-        const active = redirectAccount || msal.getActiveAccount() || msal.getAllAccounts()[0] || null;
+        const active = msal.getActiveAccount() || msal.getAllAccounts()[0] || null;
         if (active) msal.setActiveAccount(active);
         if (mounted) setAccount(active);
       } catch (error) {
