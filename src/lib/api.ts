@@ -52,5 +52,5 @@ export const customerApi = {
 export type OrderInvoice = {
   id:string; invoiceNumber:string; createdAt:string; currency:"CRC";
   items:Array<{sku:string;name:string;quantity:number;unitPrice:number;lineSubtotal:number;configuration?:Array<{sku:string;name:string;quantity:number;unitPrice:number}>}>;
-  delivery:Record<string,string>; productTotal:number; creditApplied:number; freeShippingRedeemed:boolean; subtotal:number; taxRate:number; taxAmount:number; total:number; notificationSent:boolean; customerNotificationSent:boolean; loyaltyEligible:boolean;
+  delivery:Record<string,string>; productTotal:number; shippingFee:number; creditApplied:number; freeShippingRedeemed:boolean; subtotal:number; taxRate:number; taxAmount:number; total:number; notificationSent:boolean; customerNotificationSent:boolean; loyaltyEligible:boolean;
 };
