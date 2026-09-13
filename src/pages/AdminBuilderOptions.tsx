@@ -22,7 +22,7 @@ export default function AdminBuilderOptions() {
   const [search, setSearch] = useState("");
   const options = useQuery({ queryKey:["admin-builder-options"], enabled:Boolean(account), retry:false, queryFn:async()=>{
     const token=await accessToken(account!);
-    const response=await fetch(`${apiBaseUrl}/admin-builder-options`,{headers:{"X-Golden-Bloom-Authorization":`Bearer ${token}`}});
+    const response=await fetch(`${apiBaseUrl}/dashboard-builder-options`,{headers:{"X-Golden-Bloom-Authorization":`Bearer ${token}`}});
     const body=await response.json().catch(()=>null);
     if(!response.ok) throw new Error(body?.message||"No se pudieron cargar las opciones.");
     return body as Option[];
@@ -34,7 +34,7 @@ export default function AdminBuilderOptions() {
     setSaving(true);
     try {
       const token=await accessToken(account);
-      const response=await fetch(`${apiBaseUrl}/admin-builder-options${editing?`/${editing}`:""}`,{
+      const response=await fetch(`${apiBaseUrl}/dashboard-builder-options${editing?`/${editing}`:""}`,{
         method:editing?"PATCH":"POST", headers:{"Content-Type":"application/json","X-Golden-Bloom-Authorization":`Bearer ${token}`}, body:JSON.stringify(draft),
       });
       const body=await response.json().catch(()=>null);

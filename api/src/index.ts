@@ -34,7 +34,7 @@ function parseBuilderOption(value: BuilderOptionInput) {
   return {sku,group,name,color:color||null,price,min,max,displayOrder,active:value.active};
 }
 
-app.http("adminBuilderOptions", { methods:["GET","POST"], authLevel:"anonymous", route:"admin-builder-options", handler:(request)=>secured(request, async identity=>{
+app.http("adminBuilderOptions", { methods:["GET","POST"], authLevel:"anonymous", route:"dashboard-builder-options", handler:(request)=>secured(request, async identity=>{
   if(!identity.admin) throw new Error("FORBIDDEN");
   const pool=await database();
   if(request.method==="GET") {
@@ -49,7 +49,7 @@ app.http("adminBuilderOptions", { methods:["GET","POST"], authLevel:"anonymous",
   } catch(error) { if((error as {number?:number}).number===2601 || (error as {number?:number}).number===2627) return json({message:"Ya existe una opción con ese SKU."},409); throw error; }
 }) });
 
-app.http("adminBuilderOption", { methods:["PATCH"], authLevel:"anonymous", route:"admin-builder-options/{id}", handler:(request)=>secured(request, async identity=>{
+app.http("adminBuilderOption", { methods:["PATCH"], authLevel:"anonymous", route:"dashboard-builder-options/{id}", handler:(request)=>secured(request, async identity=>{
   if(!identity.admin) throw new Error("FORBIDDEN");
   const id=request.params.id;
   if(!id || !/^[0-9a-f-]{36}$/i.test(id)) return json({message:"Opción no válida."},400);
