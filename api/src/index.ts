@@ -265,7 +265,7 @@ app.http("inventoryMovement", { methods:["POST"], authLevel:"anonymous", route:"
 app.http("confirmDashboardOrder", { methods:["POST"], authLevel:"anonymous", route:"dashboard-orders/{id}/confirm", handler:(request) => secured(request, async identity => {
   if (!identity.admin) throw new Error("FORBIDDEN"); const id=request.params.id; const pool=await database(); const tx=new sql.Transaction(pool); await tx.begin(sql.ISOLATION_LEVEL.SERIALIZABLE);
   try {
-    const order=(await new sql.Request(tx).input("id",sql.UniqueIdentifier,id).query(`SELECT customer_id,total,status FROM Orders WITH(UPDLOCK,HOLDLOCK) WHERE id=@id`)).recordset[0];
+    const order=(await new sql.Request(tx).input("id",sql.UniqueIdentifier,id).query(`SELECT customer_id,total,status,COALESCE(TRY_CONVERT(decimal(12,2),JSON_VALUE(delivery_json,'$.shippingFee')),0) shipping_fee FROM Orders WITH(UPDLOCK,HOLDLOCK) WHERE id=@id`)).recordset[0];
     if (!order) { await tx.rollback(); return json({message:"Pedido no encontrado."},404); }
     if (order.status!=="pending") { await tx.rollback(); return json({message:"El pedido ya fue procesado."},409); }
     await new sql.Request(tx).input("order",sql.UniqueIdentifier,id).input("admin",sql.NVarChar,identity.email).query(`
@@ -293,7 +293,10 @@ app.http("confirmDashboardOrder", { methods:["POST"], authLevel:"anonymous", rou
     }
     await new sql.Request(tx).input("customer",sql.NVarChar,order.customer_id).query(`IF NOT EXISTS(SELECT 1 FROM Loyalty WHERE customer_id=@customer) INSERT Loyalty(customer_id,purchase_count,cycle_spend) VALUES(@customer,0,0)`);
     const loyalty=(await new sql.Request(tx).input("customer",sql.NVarChar,order.customer_id).query(`SELECT purchase_count,cycle_spend FROM Loyalty WITH(UPDLOCK,HOLDLOCK) WHERE customer_id=@customer`)).recordset[0];
-    const startingCount=loyalty.purchase_count>=10?0:loyalty.purchase_count; const startingSpend=loyalty.purchase_count>=10?0:Number(loyalty.cycle_spend); const count=startingCount+1; const spend=startingSpend+Number(order.total);
+    const startingCount=loyalty.purchase_count>=10?0:loyalty.purchase_count; const startingSpend=loyalty.purchase_count>=10?0:Number(loyalty.cycle_spend); const count=startingCount+1;
+    // El envío se cobra en la orden, pero nunca suma ni resta en el plan de lealtad.
+    const productSpend=money(Math.max(0,Number(order.total)-Number(order.shipping_fee)));
+    const spend=money(startingSpend+productSpend);
     await new sql.Request(tx).input("id",sql.UniqueIdentifier,id).query(`UPDATE Orders SET status='paid',paid_at=SYSUTCDATETIME() WHERE id=@id`);
     await new sql.Request(tx).input("customer",sql.NVarChar,order.customer_id).input("count",sql.Int,count).input("spend",sql.Decimal(12,2),spend).query(`UPDATE Loyalty SET purchase_count=@count,cycle_spend=@spend,updated_at=SYSUTCDATETIME() WHERE customer_id=@customer`);
     if(count===5) await new sql.Request(tx).input("customer",sql.NVarChar,order.customer_id).input("order",sql.UniqueIdentifier,id).query(`INSERT Benefits(customer_id,source_order_id,kind,amount) VALUES(@customer,@order,'free_shipping',0)`);
