@@ -8,6 +8,7 @@ export type CartItem = {
   image: string;
   quantity: number;
   configuration?: Array<{ optionId: string; sku: string; name: string; quantity: number }>;
+  bouquetSize?: "small" | "medium" | "large";
 };
 
 type CartContextValue = {

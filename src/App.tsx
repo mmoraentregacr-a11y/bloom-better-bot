@@ -23,6 +23,7 @@ import Categoria from "./pages/Categoria.tsx";
 import Cuenta from "./pages/Cuenta.tsx";
 import AdminPedidos from "./pages/AdminPedidos.tsx";
 import AdminInventario from "./pages/AdminInventario.tsx";
+import AdminBuilderOptions from "./pages/AdminBuilderOptions.tsx";
 import CreaTuRamo from "./pages/CreaTuRamo.tsx";
 
 const queryClient = new QueryClient();
@@ -53,6 +54,7 @@ const App = () => (
             <Route path="/cuenta" element={<Cuenta />} />
             <Route path="/admin/pedidos" element={<AdminPedidos />} />
             <Route path="/admin/inventario" element={<AdminInventario />} />
+            <Route path="/admin/opciones-ramo" element={<AdminBuilderOptions />} />
             <Route path="/crea-tu-ramo" element={<CreaTuRamo />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

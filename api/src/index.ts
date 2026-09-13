@@ -23,6 +23,43 @@ app.http("builderOptions", { methods: ["GET"], authLevel: "anonymous", route: "b
   } catch(error) { console.error(error); return json({message:"No se pudo cargar el catálogo."},500); }
 } });
 
+type BuilderOptionInput = { sku?:string; group?:string; name?:string; color?:string; price?:number; min?:number; max?:number; displayOrder?:number; active?:boolean };
+function parseBuilderOption(value: BuilderOptionInput) {
+  const sku=String(value.sku||"").trim().toUpperCase();
+  const group=String(value.group||"");
+  const name=String(value.name||"").trim();
+  const color=String(value.color||"").trim();
+  const price=Number(value.price), min=Number(value.min), max=Number(value.max), displayOrder=Number(value.displayOrder);
+  if (!/^[A-Z0-9_-]{2,100}$/.test(sku) || !["flower","wrap","addon"].includes(group) || !name || name.length>160 || color.length>100 || !Number.isFinite(price) || price<0 || price>10000000 || Math.round(price*100)!==price*100 || !Number.isInteger(min) || !Number.isInteger(max) || min<0 || max<1 || min>max || max>1000 || !Number.isInteger(displayOrder) || displayOrder<0 || displayOrder>100000 || typeof value.active!=="boolean") return null;
+  return {sku,group,name,color:color||null,price,min,max,displayOrder,active:value.active};
+}
+
+app.http("adminBuilderOptions", { methods:["GET","POST"], authLevel:"anonymous", route:"admin-builder-options", handler:(request)=>secured(request, async identity=>{
+  if(!identity.admin) throw new Error("FORBIDDEN");
+  const pool=await database();
+  if(request.method==="GET") {
+    const result=await pool.request().query(`SELECT id,sku,option_group AS [group],name,color_name AS color,unit_price AS price,min_quantity AS min,max_quantity AS max,display_order AS displayOrder,is_active AS active FROM BuilderOptions ORDER BY display_order,name,sku`);
+    return json(result.recordset.map(o=>({...o,price:money(o.price),active:Boolean(o.active)})));
+  }
+  const input=parseBuilderOption(await request.json() as BuilderOptionInput);
+  if(!input) return json({message:"Revisa los datos de la opción (SKU, grupo, precio y cantidades)."},400);
+  try {
+    const result=await pool.request().input("id",sql.UniqueIdentifier,crypto.randomUUID()).input("sku",sql.VarChar,input.sku).input("group",sql.VarChar,input.group).input("name",sql.NVarChar,input.name).input("color",sql.NVarChar,input.color).input("price",sql.Decimal(12,2),input.price).input("min",sql.Int,input.min).input("max",sql.Int,input.max).input("displayOrder",sql.Int,input.displayOrder).input("active",sql.Bit,input.active).query(`INSERT BuilderOptions(id,sku,option_group,name,color_name,unit_price,min_quantity,max_quantity,display_order,is_active) OUTPUT INSERTED.id VALUES(@id,@sku,@group,@name,@color,@price,@min,@max,@displayOrder,@active)`);
+    return json({id:result.recordset[0].id},201);
+  } catch(error) { if((error as {number?:number}).number===2601 || (error as {number?:number}).number===2627) return json({message:"Ya existe una opción con ese SKU."},409); throw error; }
+}) });
+
+app.http("adminBuilderOption", { methods:["PATCH"], authLevel:"anonymous", route:"admin-builder-options/{id}", handler:(request)=>secured(request, async identity=>{
+  if(!identity.admin) throw new Error("FORBIDDEN");
+  const id=request.params.id;
+  if(!id || !/^[0-9a-f-]{36}$/i.test(id)) return json({message:"Opción no válida."},400);
+  const input=parseBuilderOption(await request.json() as BuilderOptionInput);
+  if(!input) return json({message:"Revisa los datos de la opción."},400);
+  const pool=await database();
+  const result=await pool.request().input("id",sql.UniqueIdentifier,id).input("sku",sql.VarChar,input.sku).input("group",sql.VarChar,input.group).input("name",sql.NVarChar,input.name).input("color",sql.NVarChar,input.color).input("price",sql.Decimal(12,2),input.price).input("min",sql.Int,input.min).input("max",sql.Int,input.max).input("displayOrder",sql.Int,input.displayOrder).input("active",sql.Bit,input.active).query(`UPDATE BuilderOptions SET option_group=@group,name=@name,color_name=@color,unit_price=@price,min_quantity=@min,max_quantity=@max,display_order=@displayOrder,is_active=@active WHERE id=@id AND sku=@sku`);
+  return result.rowsAffected[0] ? json({ok:true}) : json({message:"La opción no existe o su SKU cambió. Recarga la página."},404);
+}) });
+
 async function secured(request: HttpRequest, handler: (identity: CustomerIdentity) => Promise<HttpResponseInit>) {
   try { return await handler(await authenticate(request)); }
   catch (error) { return serverError(error); }
@@ -64,7 +101,7 @@ app.http("me", { methods: ["GET"], authLevel: "anonymous", route: "me", handler:
 }) });
 
 app.http("orders", { methods: ["POST"], authLevel: "anonymous", route: "orders", handler: (request) => optionallySecured(request, async identity => {
-  type IncomingItem = { id:string; sku?:string; name:string; price?:number; quantity:number; configuration?:Array<{optionId:string;sku:string;name:string;quantity:number}> };
+  type IncomingItem = { id:string; sku?:string; name:string; price?:number; quantity:number; bouquetSize?:"small"|"medium"|"large"; configuration?:Array<{optionId:string;sku:string;name:string;quantity:number}> };
   const body = await request.json() as { items?: IncomingItem[]; delivery?: Record<string,string> };
   if (!body.items?.length || body.items.some(i => !i.id || !i.name?.trim() || i.name.length>240 || !Number.isInteger(i.quantity) || i.quantity<1 || i.quantity>100)) return json({ message: "El pedido no es válido." }, 400);
   const guestName=String(body.delivery?.nombre||"").trim().slice(0,100);
@@ -82,18 +119,22 @@ app.http("orders", { methods: ["POST"], authLevel: "anonymous", route: "orders",
     for (const item of body.items) {
       if (item.sku === "CUSTOM-BOUQUET") {
         if (!item.configuration?.length) { await tx.rollback(); return json({message:"El ramo personalizado no tiene opciones."},400); }
+        const bouquetSizes = { small:{name:"pequeño",flowers:3,price:5500}, medium:{name:"mediano",flowers:6,price:12000}, large:{name:"grande",flowers:12,price:22000} } as const;
+        const size = item.bouquetSize && bouquetSizes[item.bouquetSize];
+        if (!size) { await tx.rollback(); return json({message:"Selecciona el tamaño del ramo personalizado."},400); }
         const resolved: Array<{id:string;sku:string;name:string;quantity:number;unitPrice:number}> = [];
-        let unitPrice = 0; let flowers = 0; let wraps = 0;
+        let detailsPrice = 0; let flowers = 0; let wraps = 0;
         for (const selected of item.configuration) {
           const option = (await new sql.Request(tx).input("id",sql.UniqueIdentifier,selected.optionId).query(`SELECT id,sku,option_group,name,color_name,unit_price,max_quantity FROM BuilderOptions WHERE id=@id AND is_active=1`)).recordset[0];
           const qty = Math.floor(selected.quantity);
           if (!option || qty < 1 || qty > option.max_quantity) { await tx.rollback(); return json({message:"Una opción del ramo ya no está disponible."},409); }
           if(option.option_group === "flower") flowers += qty; if(option.option_group === "wrap") wraps += qty;
-          unitPrice += Number(option.unit_price) * qty;
+          if(option.option_group !== "flower") detailsPrice += Number(option.unit_price) * qty;
           resolved.push({id:option.id,sku:option.sku,name:option.color_name?`${option.name} ${option.color_name}`:option.name,quantity:qty,unitPrice:Number(option.unit_price)});
         }
-        if(flowers < 1 || wraps > 1) { await tx.rollback(); return json({message:"Revisa las flores y la envoltura del ramo."},400); }
-        pricedItems.push({...item,unitPrice:money(unitPrice),displayName:"Ramo personalizado",resolved});
+        if(flowers < size.flowers || wraps > 1) { await tx.rollback(); return json({message:`El ramo ${size.name} requiere al menos ${size.flowers} flores y una sola envoltura.`},400); }
+        const unitPrice = size.price + Math.max(0,flowers-size.flowers)*2000 + detailsPrice;
+        pricedItems.push({...item,unitPrice:money(unitPrice),displayName:`Ramo personalizado ${size.name}`,resolved});
       } else {
         const sku=item.sku||`LEGACY-${item.id.toUpperCase()}`;
         const product=(await new sql.Request(tx).input("sku",sql.VarChar,sku).query(`SELECT sku,name,price FROM Products WHERE sku=@sku AND is_active=1`)).recordset[0];
