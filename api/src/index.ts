@@ -102,12 +102,13 @@ app.http("me", { methods: ["GET"], authLevel: "anonymous", route: "me", handler:
 
 app.http("orders", { methods: ["POST"], authLevel: "anonymous", route: "orders", handler: (request) => optionallySecured(request, async identity => {
   type IncomingItem = { id:string; sku?:string; name:string; price?:number; quantity:number; bouquetSize?:"small"|"medium"|"large"; configuration?:Array<{optionId:string;sku:string;name:string;quantity:number}> };
-  const body = await request.json() as { items?: IncomingItem[]; delivery?: Record<string,string> };
+  const body = await request.json() as { items?: IncomingItem[]; delivery?: Record<string,string>; redeemFreeShipping?:boolean; redeemCredit?:boolean };
   if (!body.items?.length || body.items.some(i => !i.id || !i.name?.trim() || i.name.length>240 || !Number.isInteger(i.quantity) || i.quantity<1 || i.quantity>100)) return json({ message: "El pedido no es válido." }, 400);
   const guestName=String(body.delivery?.nombre||"").trim().slice(0,100);
   const guestEmail=String(body.delivery?.email||"").trim().toLowerCase().slice(0,255);
   if(!identity&&(!guestName||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail))) return json({message:"Completa un nombre y correo válidos para continuar sin iniciar sesión."},400);
-  const pool = await database(); const tx = new sql.Transaction(pool); await tx.begin();
+  if ((body.redeemFreeShipping || body.redeemCredit) && !identity) return json({message:"Inicia sesión para redimir beneficios."},401);
+  const pool = await database(); const tx = new sql.Transaction(pool); await tx.begin(sql.ISOLATION_LEVEL.SERIALIZABLE);
   try {
     const guestId=crypto.randomUUID();
     const customerId=identity?.id||`guest:${guestId}`;
@@ -146,16 +147,38 @@ app.http("orders", { methods: ["POST"], authLevel: "anonymous", route: "orders",
         }
       }
     }
-    const total=money(pricedItems.reduce((sum,item)=>sum+item.unitPrice*Math.floor(item.quantity),0));
+    const productTotal=money(pricedItems.reduce((sum,item)=>sum+item.unitPrice*Math.floor(item.quantity),0));
+    let freeShippingRedeemed=false; let creditApplied=0;
+    if(body.redeemFreeShipping) {
+      const benefit=(await new sql.Request(tx).input("customer",sql.NVarChar,customer).query(`SELECT TOP(1) id FROM Benefits WITH(UPDLOCK,HOLDLOCK) WHERE customer_id=@customer AND kind='free_shipping' AND redeemed_at IS NULL ORDER BY created_at,id`)).recordset[0];
+      if(!benefit){await tx.rollback();return json({message:"El envío gratis ya no está disponible. Actualiza tu cuenta y vuelve a intentarlo."},409);}
+      await new sql.Request(tx).input("id",sql.UniqueIdentifier,benefit.id).query(`UPDATE Benefits SET redeemed_at=SYSUTCDATETIME() WHERE id=@id`);
+      freeShippingRedeemed=true;
+    }
+    if(body.redeemCredit) {
+      const benefits=(await new sql.Request(tx).input("customer",sql.NVarChar,customer).query(`SELECT id,amount FROM Benefits WITH(UPDLOCK,HOLDLOCK) WHERE customer_id=@customer AND kind='credit' AND redeemed_at IS NULL AND amount>0 ORDER BY created_at,id`)).recordset;
+      const available=money(benefits.reduce((sum,benefit)=>sum+Number(benefit.amount),0));
+      if(!available){await tx.rollback();return json({message:"El crédito del 10% ya no está disponible. Actualiza tu cuenta y vuelve a intentarlo."},409);}
+      creditApplied=money(Math.min(productTotal,available));
+      let remaining=creditApplied;
+      for(const benefit of benefits){
+        if(remaining<=0) break;
+        const used=money(Math.min(remaining,Number(benefit.amount)));
+        await new sql.Request(tx).input("id",sql.UniqueIdentifier,benefit.id).input("used",sql.Decimal(12,2),used).query(`UPDATE Benefits SET amount=amount-@used,redeemed_at=CASE WHEN amount-@used<=0 THEN SYSUTCDATETIME() ELSE NULL END WHERE id=@id`);
+        remaining=money(remaining-used);
+      }
+    }
+    const total=money(productTotal-creditApplied);
     const configuredTaxRate=Number(process.env.IVA_RATE||"0.13");
     const taxRate=Number.isFinite(configuredTaxRate)&&configuredTaxRate>=0&&configuredTaxRate<=1?configuredTaxRate:0.13;
     // Catalog prices already include IVA. Extract it for the invoice instead of
     // charging the customer a second time.
-    const subtotal=money(total/(1+taxRate));
-    const taxAmount=money(total-subtotal);
+    const subtotal=money(productTotal/(1+taxRate));
+    const taxAmount=money(productTotal-subtotal);
     const orderId = crypto.randomUUID();
     const invoiceNumber=`GB-${new Date().toISOString().slice(0,10).replaceAll("-","")}-${orderId.slice(0,8).toUpperCase()}`; const createdAt=new Date().toISOString();
-    await new sql.Request(tx).input("id",sql.UniqueIdentifier,orderId).input("customer",sql.NVarChar,customer).input("invoice",sql.VarChar,invoiceNumber).input("subtotal",sql.Decimal(12,2),subtotal).input("taxRate",sql.Decimal(6,5),taxRate).input("taxAmount",sql.Decimal(12,2),taxAmount).input("total",sql.Decimal(12,2),total).input("delivery",sql.NVarChar,JSON.stringify(body.delivery||{})).query(`INSERT Orders(id,customer_id,invoice_number,subtotal,tax_rate,tax_amount,total,status,delivery_json) VALUES(@id,@customer,@invoice,@subtotal,@taxRate,@taxAmount,@total,'pending',@delivery)`);
+    const delivery={...body.delivery,freeShippingRedeemed:freeShippingRedeemed?"Sí":undefined,creditApplied:creditApplied?String(creditApplied):undefined};
+    await new sql.Request(tx).input("id",sql.UniqueIdentifier,orderId).input("customer",sql.NVarChar,customer).input("invoice",sql.VarChar,invoiceNumber).input("subtotal",sql.Decimal(12,2),subtotal).input("taxRate",sql.Decimal(6,5),taxRate).input("taxAmount",sql.Decimal(12,2),taxAmount).input("total",sql.Decimal(12,2),total).input("delivery",sql.NVarChar,JSON.stringify(delivery)).query(`INSERT Orders(id,customer_id,invoice_number,subtotal,tax_rate,tax_amount,total,status,delivery_json) VALUES(@id,@customer,@invoice,@subtotal,@taxRate,@taxAmount,@total,'pending',@delivery)`);
     for (const item of pricedItems) {
       const inserted=await new sql.Request(tx).input("order",sql.UniqueIdentifier,orderId).input("product",sql.NVarChar,item.id).input("sku",sql.VarChar,item.sku).input("name",sql.NVarChar,item.displayName).input("price",sql.Decimal(12,2),item.unitPrice).input("qty",sql.Int,Math.floor(item.quantity)).input("config",sql.NVarChar,item.resolved?JSON.stringify(item.resolved):null).query(`INSERT OrderItems(order_id,product_id,sku,name,unit_price,quantity,configuration_json) OUTPUT INSERTED.id VALUES(@order,@product,@sku,@name,@price,@qty,@config)`);
       if(item.resolved) for(const option of item.resolved) await new sql.Request(tx).input("orderItem",sql.BigInt,inserted.recordset[0].id).input("option",sql.UniqueIdentifier,option.id).input("sku",sql.VarChar,option.sku).input("name",sql.NVarChar,option.name).input("qty",sql.Int,option.quantity).input("price",sql.Decimal(12,2),option.unitPrice).query(`INSERT CustomBouquetItems(order_item_id,builder_option_id,sku,name,quantity,unit_price) VALUES(@orderItem,@option,@sku,@name,@qty,@price)`);
@@ -163,8 +186,8 @@ app.http("orders", { methods: ["POST"], authLevel: "anonymous", route: "orders",
     await tx.commit();
     const invoiceItems=pricedItems.map(item=>({sku:item.sku!,name:item.displayName,quantity:Math.floor(item.quantity),unitPrice:item.unitPrice,lineSubtotal:money(item.unitPrice*Math.floor(item.quantity)),configuration:item.resolved}));
     const notificationCustomer={name:identity?.name||guestName,email:identity?.email||guestEmail};
-    let notificationSent=false; let customerNotificationSent=false; try{const sent=await notifyAdmins({invoiceNumber,createdAt,customer:notificationCustomer,delivery:body.delivery||{},items:invoiceItems,subtotal,taxRate,taxAmount,total});notificationSent=sent.adminSent;customerNotificationSent=sent.customerSent;}catch(error){console.error("No se pudo enviar el correo del pedido",error);}
-    return json({id:orderId,invoiceNumber,createdAt,currency:"CRC",items:invoiceItems,delivery:body.delivery||{},subtotal,taxRate,taxAmount,total,notificationSent,customerNotificationSent,loyaltyEligible:Boolean(identity)},201);
+    let notificationSent=false; let customerNotificationSent=false; try{const sent=await notifyAdmins({invoiceNumber,createdAt,customer:notificationCustomer,delivery:body.delivery||{},items:invoiceItems,productTotal,creditApplied,freeShippingRedeemed,subtotal,taxRate,taxAmount,total});notificationSent=sent.adminSent;customerNotificationSent=sent.customerSent;}catch(error){console.error("No se pudo enviar el correo del pedido",error);}
+    return json({id:orderId,invoiceNumber,createdAt,currency:"CRC",items:invoiceItems,delivery:body.delivery||{},productTotal,creditApplied,freeShippingRedeemed,subtotal,taxRate,taxAmount,total,notificationSent,customerNotificationSent,loyaltyEligible:Boolean(identity)},201);
   } catch(error) { await tx.rollback(); throw error; }
 }) });
 

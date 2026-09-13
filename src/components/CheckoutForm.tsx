@@ -6,6 +6,8 @@ import { useCart } from "@/context/CartContext";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import { customerApi, type OrderInvoice } from "@/lib/api";
+import type { LoyaltySummary } from "@/types/customer";
+import { useQueryClient } from "@tanstack/react-query";
 
 const PROVINCIAS = [
   "San José",
@@ -68,7 +70,8 @@ const inputCls =
 
 const CheckoutForm = ({ onCancel }: { onCancel: () => void }) => {
   const navigate=useNavigate();
-  const { items, clear, closeCart } = useCart();
+  const queryClient=useQueryClient();
+  const { items, total:cartTotal, clear, closeCart } = useCart();
   const { account, configured, login } = useAuth();
   const [data, setData] = useState<FormData>(()=>{
     try{return {...initial,...JSON.parse(sessionStorage.getItem(CHECKOUT_DRAFT_KEY)||"{}")};}
@@ -78,11 +81,15 @@ const CheckoutForm = ({ onCancel }: { onCancel: () => void }) => {
   const [submitting, setSubmitting] = useState(false);
   const [invoice, setInvoice] = useState<OrderInvoice | null>(null);
   const [showGuestChoice,setShowGuestChoice]=useState(false);
+  const [loyalty,setLoyalty]=useState<LoyaltySummary|null>(null);
+  const [loyaltyError,setLoyaltyError]=useState(false);
+  const [redeemFreeShipping,setRedeemFreeShipping]=useState(false);
+  const [redeemCredit,setRedeemCredit]=useState(false);
 
   useEffect(()=>{
     if(!account)return;
     setData(current=>({...current,nombre:current.nombre||account.name||"",email:current.email||account.username||""}));
-    customerApi.dashboard(account).then(profile=>setData(current=>({...current,nombre:current.nombre||profile.name||"",email:current.email||profile.email||"",telefono:current.telefono||profile.phone||""}))).catch(()=>undefined);
+    customerApi.dashboard(account).then(profile=>{setLoyalty(profile.loyalty);setLoyaltyError(false);setData(current=>({...current,nombre:current.nombre||profile.name||"",email:current.email||profile.email||"",telefono:current.telefono||profile.phone||""}));}).catch(()=>setLoyaltyError(true));
   },[account]);
 
   const set = <K extends keyof FormData>(k: K, v: FormData[K]) =>
@@ -91,7 +98,7 @@ const CheckoutForm = ({ onCancel }: { onCancel: () => void }) => {
   const createOrder = async (d:FormData,asGuest=false) => {
     setSubmitting(true);
     let created:OrderInvoice;
-    try { created=asGuest?await customerApi.createGuestOrder({items,delivery:d}):await customerApi.createOrder(account!,{items,delivery:d}); }
+    try { created=asGuest?await customerApi.createGuestOrder({items,delivery:d}):await customerApi.createOrder(account!,{items,delivery:d,redeemFreeShipping,redeemCredit}); }
     catch(error){toast({title:"No pudimos registrar el pedido",description:error instanceof Error?error.message:undefined,variant:"destructive"});setSubmitting(false);return;}
     const lines: string[] = [];
     lines.push("*🌸 NUEVO PEDIDO — GOLDEN BLOOM*");
@@ -117,12 +124,15 @@ const CheckoutForm = ({ onCancel }: { onCancel: () => void }) => {
     lines.push("");
     lines.push(`Subtotal sin IVA: ${fmtCRC(created.subtotal)}`);
     lines.push(`IVA incluido (${created.taxRate*100}%): ${fmtCRC(created.taxAmount)}`);
+    if(created.creditApplied) lines.push(`Crédito de lealtad aplicado: −${fmtCRC(created.creditApplied)}`);
+    if(created.freeShippingRedeemed) lines.push("Beneficio de envío gratis redimido");
     lines.push(`*TOTAL: ${fmtCRC(created.total)}*`);
     if (d.mensaje && d.mensaje.trim().length > 0) { lines.push("", "*📝 Mensaje / notas*", d.mensaje.trim()); }
     sessionStorage.setItem("golden-bloom-order-whatsapp",lines.join("\n"));
     setInvoice(created);
     toast({title:"Solicitud creada",description:created.customerNotificationSent?"Enviamos una copia de la factura a tu correo.":"La factura fue creada, pero no pudimos enviar la copia por correo."});
     setSubmitting(false);
+    void queryClient.invalidateQueries({queryKey:["customer-dashboard"]});
     clear();
     sessionStorage.removeItem(CHECKOUT_DRAFT_KEY);
     setData(initial);
@@ -159,7 +169,7 @@ const CheckoutForm = ({ onCancel }: { onCancel: () => void }) => {
     const whatsapp=()=>window.open(`https://wa.me/${ORDER_WHATSAPP}?text=${encodeURIComponent(sessionStorage.getItem("golden-bloom-order-whatsapp")||"")}`,"_blank","noopener,noreferrer");
     return <section className="space-y-6" aria-label="Orden de compra">
       <div className="text-center"><CheckCircle2 className="mx-auto text-primary" size={42}/><p className="text-xs tracking-[.3em] uppercase text-primary mt-3">Solicitud recibida</p><h3 className="font-serif text-3xl mt-2">Orden de compra</h3><p className="font-mono text-sm mt-1">{invoice.invoiceNumber}</p><p className="text-xs text-muted-foreground">{new Date(invoice.createdAt).toLocaleString("es-CR")}</p></div>
-      <div className="border border-border bg-card p-5 space-y-4"><div className="grid grid-cols-[1fr_auto_auto] gap-3 text-[10px] uppercase tracking-wider text-muted-foreground"><span>Detalle</span><span>Cant.</span><span>Importe</span></div>{invoice.items.map((item,index)=><div key={`${item.sku}-${index}`} className="grid grid-cols-[1fr_auto_auto] gap-3 border-t border-border pt-3 text-sm"><div><strong>{item.name}</strong><p className="text-xs text-muted-foreground">{item.sku} · {fmtCRC(item.unitPrice)} c/u (IVA incluido)</p>{item.configuration?.map(option=><p key={option.sku} className="text-xs text-muted-foreground mt-1">↳ {option.quantity} × {option.name} ({fmtCRC(option.unitPrice)} c/u)</p>)}</div><span>{item.quantity}</span><span className="tabular-nums">{fmtCRC(item.lineSubtotal)}</span></div>)}<dl className="border-t border-border pt-4 space-y-2 text-sm"><div className="flex justify-between"><dt>Subtotal sin IVA</dt><dd>{fmtCRC(invoice.subtotal)}</dd></div><div className="flex justify-between"><dt>IVA incluido ({invoice.taxRate*100}%)</dt><dd>{fmtCRC(invoice.taxAmount)}</dd></div><div className="flex justify-between font-serif text-xl text-primary"><dt>Total</dt><dd>{fmtCRC(invoice.total)}</dd></div></dl></div>
+      <div className="border border-border bg-card p-5 space-y-4"><div className="grid grid-cols-[1fr_auto_auto] gap-3 text-[10px] uppercase tracking-wider text-muted-foreground"><span>Detalle</span><span>Cant.</span><span>Importe</span></div>{invoice.items.map((item,index)=><div key={`${item.sku}-${index}`} className="grid grid-cols-[1fr_auto_auto] gap-3 border-t border-border pt-3 text-sm"><div><strong>{item.name}</strong><p className="text-xs text-muted-foreground">{item.sku} · {fmtCRC(item.unitPrice)} c/u (IVA incluido)</p>{item.configuration?.map(option=><p key={option.sku} className="text-xs text-muted-foreground mt-1">↳ {option.quantity} × {option.name} ({fmtCRC(option.unitPrice)} c/u)</p>)}</div><span>{item.quantity}</span><span className="tabular-nums">{fmtCRC(item.lineSubtotal)}</span></div>)}<dl className="border-t border-border pt-4 space-y-2 text-sm">{invoice.creditApplied>0&&<><div className="flex justify-between"><dt>Productos</dt><dd>{fmtCRC(invoice.productTotal)}</dd></div><div className="flex justify-between text-primary"><dt>Crédito de lealtad</dt><dd>−{fmtCRC(invoice.creditApplied)}</dd></div></>}{invoice.freeShippingRedeemed&&<div className="flex justify-between text-primary"><dt>Beneficio de envío gratis</dt><dd>Redimido</dd></div>}<div className="flex justify-between"><dt>Subtotal sin IVA</dt><dd>{fmtCRC(invoice.subtotal)}</dd></div><div className="flex justify-between"><dt>IVA incluido ({invoice.taxRate*100}%)</dt><dd>{fmtCRC(invoice.taxAmount)}</dd></div><div className="flex justify-between font-serif text-xl text-primary"><dt>Total</dt><dd>{fmtCRC(invoice.total)}</dd></div></dl></div>
       <p className={`text-xs border p-3 ${invoice.notificationSent&&invoice.customerNotificationSent?"border-primary/30":"border-amber-500/40"}`}>{invoice.notificationSent&&invoice.customerNotificationSent?"Enviamos la factura a tu correo y notificamos a los administradores.":invoice.customerNotificationSent?"Enviamos tu factura por correo; la solicitud también está guardada en el panel administrativo.":"La solicitud está guardada, pero no se pudo enviar la copia por correo."}</p>
       <div className="grid sm:grid-cols-2 gap-3"><button type="button" onClick={()=>window.print()} className="border border-foreground/30 px-4 py-3 text-xs uppercase tracking-wider inline-flex justify-center items-center gap-2"><Printer size={15}/> Imprimir / PDF</button><button type="button" onClick={whatsapp} className="border border-foreground/30 px-4 py-3 text-xs uppercase tracking-wider inline-flex justify-center items-center gap-2"><MessageCircle size={15}/> WhatsApp</button></div>
       <button type="button" onClick={finish} className="w-full bg-primary text-primary-foreground px-5 py-4 text-xs uppercase tracking-[.25em]">Ir a mi cuenta</button>
@@ -291,6 +301,9 @@ const CheckoutForm = ({ onCancel }: { onCancel: () => void }) => {
           maxLength={300}
         />
       </section>
+
+      {account&&(loyalty?.freeShippingAvailable||Number(loyalty?.creditAvailable)>0)&&<section className="space-y-4 border border-primary/30 bg-primary/5 p-5" aria-label="Redimir beneficios"><h3 className="font-serif text-xl">Tus beneficios disponibles</h3>{loyalty?.freeShippingAvailable&&<label className="flex items-start gap-3 cursor-pointer"><input type="checkbox" checked={redeemFreeShipping} onChange={event=>setRedeemFreeShipping(event.target.checked)} className="mt-1"/><span><strong>Envío gratis</strong><span className="block text-sm text-muted-foreground">Lo ganaste al completar 5 compras. ¿Quieres redimirlo en este pedido?</span></span></label>}{Number(loyalty?.creditAvailable)>0&&<label className="flex items-start gap-3 cursor-pointer"><input type="checkbox" checked={redeemCredit} onChange={event=>setRedeemCredit(event.target.checked)} className="mt-1"/><span><strong>Crédito del 10%: {fmtCRC(loyalty!.creditAvailable)} disponible</strong><span className="block text-sm text-muted-foreground">Lo ganaste al completar 10 compras. ¿Quieres aplicar hasta {fmtCRC(Math.min(cartTotal,loyalty!.creditAvailable))} a esta compra? Si sobra crédito, queda disponible para otra compra.</span></span></label>}<p className="text-xs text-muted-foreground">Los beneficios se aplican solo si los seleccionas. El importe definitivo se calcula con los precios vigentes al crear la orden.</p></section>}
+      {account&&loyaltyError&&<p className="text-sm text-amber-700">No pudimos consultar tus beneficios. Puedes continuar sin redimirlos y volver a intentarlo después.</p>}
 
       <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4">
         <button
