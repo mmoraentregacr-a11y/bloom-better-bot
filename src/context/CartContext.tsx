@@ -77,7 +77,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             .map((p) => (p.id === id ? { ...p, quantity: Math.max(0, qty) } : p))
             .filter((p) => p.quantity > 0),
         ),
-      clear: () => setItems([]),
+      clear: () => {
+        try {
+          localStorage.setItem(STORAGE_KEY, "[]");
+        } catch {
+          /* El estado de React se limpia aunque el navegador bloquee el almacenamiento. */
+        }
+        setItems([]);
+      },
     };
   }, [items, isOpen]);
 

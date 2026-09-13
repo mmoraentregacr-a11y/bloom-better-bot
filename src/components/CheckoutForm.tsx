@@ -61,13 +61,14 @@ const initial: FormData = {
   mensaje: "",
 };
 const CHECKOUT_DRAFT_KEY="golden-bloom-checkout-draft";
+const fmtCRC = (n: number) => `₡ ${n.toLocaleString("es-CR")}`;
 
 const inputCls =
   "w-full bg-background border border-border rounded-md px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition";
 
 const CheckoutForm = ({ onCancel }: { onCancel: () => void }) => {
   const navigate=useNavigate();
-  const { items, clear } = useCart();
+  const { items, clear, closeCart } = useCart();
   const { account, configured, login } = useAuth();
   const [data, setData] = useState<FormData>(()=>{
     try{return {...initial,...JSON.parse(sessionStorage.getItem(CHECKOUT_DRAFT_KEY)||"{}")};}
@@ -92,7 +93,6 @@ const CheckoutForm = ({ onCancel }: { onCancel: () => void }) => {
     let created:OrderInvoice;
     try { created=asGuest?await customerApi.createGuestOrder({items,delivery:d}):await customerApi.createOrder(account!,{items,delivery:d}); }
     catch(error){toast({title:"No pudimos registrar el pedido",description:error instanceof Error?error.message:undefined,variant:"destructive"});setSubmitting(false);return;}
-    const fmtCRC = (n: number) => `₡ ${n.toLocaleString("es-CR")}`;
     const lines: string[] = [];
     lines.push("*🌸 NUEVO PEDIDO — GOLDEN BLOOM*");
     lines.push(`Orden: ${created.invoiceNumber}`);
@@ -123,6 +123,12 @@ const CheckoutForm = ({ onCancel }: { onCancel: () => void }) => {
     setInvoice(created);
     toast({title:"Solicitud creada",description:created.customerNotificationSent?"Enviamos una copia de la factura a tu correo.":"La factura fue creada, pero no pudimos enviar la copia por correo."});
     setSubmitting(false);
+    clear();
+    sessionStorage.removeItem(CHECKOUT_DRAFT_KEY);
+    setData(initial);
+    onCancel();
+    closeCart();
+    navigate("/cuenta");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -149,14 +155,14 @@ const CheckoutForm = ({ onCancel }: { onCancel: () => void }) => {
   };
 
   if(invoice){
-    const finish=()=>{clear();sessionStorage.removeItem(CHECKOUT_DRAFT_KEY);setData(initial);setInvoice(null);onCancel();navigate("/");};
+    const finish=()=>{clear();sessionStorage.removeItem(CHECKOUT_DRAFT_KEY);setData(initial);setInvoice(null);onCancel();closeCart();navigate("/cuenta");};
     const whatsapp=()=>window.open(`https://wa.me/${ORDER_WHATSAPP}?text=${encodeURIComponent(sessionStorage.getItem("golden-bloom-order-whatsapp")||"")}`,"_blank","noopener,noreferrer");
     return <section className="space-y-6" aria-label="Orden de compra">
       <div className="text-center"><CheckCircle2 className="mx-auto text-primary" size={42}/><p className="text-xs tracking-[.3em] uppercase text-primary mt-3">Solicitud recibida</p><h3 className="font-serif text-3xl mt-2">Orden de compra</h3><p className="font-mono text-sm mt-1">{invoice.invoiceNumber}</p><p className="text-xs text-muted-foreground">{new Date(invoice.createdAt).toLocaleString("es-CR")}</p></div>
       <div className="border border-border bg-card p-5 space-y-4"><div className="grid grid-cols-[1fr_auto_auto] gap-3 text-[10px] uppercase tracking-wider text-muted-foreground"><span>Detalle</span><span>Cant.</span><span>Importe</span></div>{invoice.items.map((item,index)=><div key={`${item.sku}-${index}`} className="grid grid-cols-[1fr_auto_auto] gap-3 border-t border-border pt-3 text-sm"><div><strong>{item.name}</strong><p className="text-xs text-muted-foreground">{item.sku} · {fmtCRC(item.unitPrice)} c/u (IVA incluido)</p>{item.configuration?.map(option=><p key={option.sku} className="text-xs text-muted-foreground mt-1">↳ {option.quantity} × {option.name} ({fmtCRC(option.unitPrice)} c/u)</p>)}</div><span>{item.quantity}</span><span className="tabular-nums">{fmtCRC(item.lineSubtotal)}</span></div>)}<dl className="border-t border-border pt-4 space-y-2 text-sm"><div className="flex justify-between"><dt>Subtotal sin IVA</dt><dd>{fmtCRC(invoice.subtotal)}</dd></div><div className="flex justify-between"><dt>IVA incluido ({invoice.taxRate*100}%)</dt><dd>{fmtCRC(invoice.taxAmount)}</dd></div><div className="flex justify-between font-serif text-xl text-primary"><dt>Total</dt><dd>{fmtCRC(invoice.total)}</dd></div></dl></div>
       <p className={`text-xs border p-3 ${invoice.notificationSent&&invoice.customerNotificationSent?"border-primary/30":"border-amber-500/40"}`}>{invoice.notificationSent&&invoice.customerNotificationSent?"Enviamos la factura a tu correo y notificamos a los administradores.":invoice.customerNotificationSent?"Enviamos tu factura por correo; la solicitud también está guardada en el panel administrativo.":"La solicitud está guardada, pero no se pudo enviar la copia por correo."}</p>
       <div className="grid sm:grid-cols-2 gap-3"><button type="button" onClick={()=>window.print()} className="border border-foreground/30 px-4 py-3 text-xs uppercase tracking-wider inline-flex justify-center items-center gap-2"><Printer size={15}/> Imprimir / PDF</button><button type="button" onClick={whatsapp} className="border border-foreground/30 px-4 py-3 text-xs uppercase tracking-wider inline-flex justify-center items-center gap-2"><MessageCircle size={15}/> WhatsApp</button></div>
-      <button type="button" onClick={finish} className="w-full bg-primary text-primary-foreground px-5 py-4 text-xs uppercase tracking-[.25em]">Volver al inicio</button>
+      <button type="button" onClick={finish} className="w-full bg-primary text-primary-foreground px-5 py-4 text-xs uppercase tracking-[.25em]">Ir a mi cuenta</button>
     </section>;
   }
 
