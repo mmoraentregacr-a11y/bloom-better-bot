@@ -14,12 +14,11 @@ const PROVINCIAS = [
   "Alajuela",
   "Cartago",
   "Heredia",
-  "Guanacaste",
-  "Puntarenas",
-  "Limón",
 ];
 const PROVINCE_IDS: Record<string, number> = Object.fromEntries(PROVINCIAS.map((name,index)=>[name,index+1]));
 const normalizePlace = (value:string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
+const excludedAlajuelaCantons = new Set(["san carlos","los chiles","orotina","zarcero","guatuso","upala"]);
+const isSupportedDelivery = (provincia:string,canton:string) => PROVINCIAS.includes(provincia)&&!(normalizePlace(provincia)==="alajuela"&&excludedAlajuelaCantons.has(normalizePlace(canton)));
 const isFreeDeliveryZone = (provincia:string,canton:string,distrito:string) => {
   const p=normalizePlace(provincia),c=normalizePlace(canton),d=normalizePlace(distrito);
   return p==="san jose"&&((c==="desamparados"&&d==="desamparados")||(["central","san jose"].includes(c)&&["san francisco de dos rios","san sebastian"].includes(d)));
@@ -60,6 +59,7 @@ const schema = z.object({
   if(value.pickup) return;
   const required: Array<[keyof typeof value,string,number]> = [["recibeNombre","Nombre de quien recibe requerido",2],["recibeTel","Teléfono de quien recibe inválido",8],["provincia","Selecciona una provincia",1],["canton","Selecciona un cantón",2],["distrito","Selecciona un distrito",2],["direccion","Dirección exacta requerida",5]];
   for(const [key,message,min] of required) if(String(value[key]).trim().length<min) ctx.addIssue({code:z.ZodIssueCode.custom,path:[key],message});
+  if(value.provincia&&value.canton&&!isSupportedDelivery(value.provincia,value.canton)) ctx.addIssue({code:z.ZodIssueCode.custom,path:["canton"],message:"No realizamos entregas en esta zona."});
 });
 
 type FormData = z.infer<typeof schema>;
@@ -116,7 +116,7 @@ const CheckoutForm = ({ onCancel }: { onCancel: () => void }) => {
   useEffect(()=>{
     if(!provinceId){setCantons({});return;}
     let active=true;
-    locationOptions(`/provincia/${provinceId}/cantones.json`).then(options=>{if(active){setCantons(options);setLocationsError(false);}}).catch(()=>{if(active)setLocationsError(true);});
+    locationOptions(`/provincia/${provinceId}/cantones.json`).then(options=>{if(active){setCantons(provinceId===2?Object.fromEntries(Object.entries(options).filter(([,name])=>!excludedAlajuelaCantons.has(normalizePlace(name)))):options);setLocationsError(false);}}).catch(()=>{if(active)setLocationsError(true);});
     return ()=>{active=false;};
   },[provinceId]);
   useEffect(()=>{

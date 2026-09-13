@@ -6,6 +6,9 @@ import { notifyAdmins } from "./email.js";
 const json = (body: unknown, status = 200): HttpResponseInit => ({ status, jsonBody: body });
 const money = (value: unknown) => Math.round(Number(value) * 100) / 100;
 const normalizePlace = (value:unknown) => String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
+const allowedProvinces=new Set(["san jose","alajuela","cartago","heredia"]);
+const excludedAlajuelaCantons=new Set(["san carlos","los chiles","orotina","zarcero","guatuso","upala"]);
+const deliverySupported=(delivery:Record<string,string>)=>allowedProvinces.has(normalizePlace(delivery.provincia))&&!(normalizePlace(delivery.provincia)==="alajuela"&&excludedAlajuelaCantons.has(normalizePlace(delivery.canton)));
 const freeDeliveryZone = (delivery:Record<string,string>) => {
   const province=normalizePlace(delivery.provincia),canton=normalizePlace(delivery.canton),district=normalizePlace(delivery.distrito);
   return province==="san jose"&&((canton==="desamparados"&&district==="desamparados")||(["central","san jose"].includes(canton)&&["san francisco de dos rios","san sebastian"].includes(district)));
@@ -115,6 +118,7 @@ app.http("orders", { methods: ["POST"], authLevel: "anonymous", route: "orders",
   const delivery=body.delivery||{};
   const pickup=delivery.pickup==="Sí";
   if(!pickup&&[delivery.recibeNombre,delivery.recibeTel,delivery.provincia,delivery.canton,delivery.distrito,delivery.direccion].some(value=>!String(value||"").trim())) return json({message:"Completa los datos de entrega o selecciona pasar a retirar."},400);
+  if(!pickup&&!deliverySupported(delivery)) return json({message:"No realizamos entregas en esa provincia o cantón. Selecciona otra zona o pasa a retirar."},400);
   const baseShippingFee=pickup||freeDeliveryZone(delivery)?0:2000;
   if ((body.redeemFreeShipping || body.redeemCredit) && !identity) return json({message:"Inicia sesión para redimir beneficios."},401);
   const pool = await database(); const tx = new sql.Transaction(pool); await tx.begin(sql.ISOLATION_LEVEL.SERIALIZABLE);
