@@ -99,10 +99,10 @@ app.http("me", { methods: ["GET"], authLevel: "anonymous", route: "me", handler:
       CAST(CASE WHEN EXISTS(SELECT 1 FROM Benefits b WHERE b.customer_id=c.id AND b.kind='free_shipping' AND b.redeemed_at IS NULL) THEN 1 ELSE 0 END AS bit) free_shipping,
       COALESCE((SELECT SUM(amount) FROM Benefits b WHERE b.customer_id=c.id AND b.kind='credit' AND b.redeemed_at IS NULL),0) credit
     FROM Customers c LEFT JOIN Loyalty l ON l.customer_id=c.id WHERE c.id=@id;
-    SELECT id,created_at,total,status,(SELECT SUM(quantity) FROM OrderItems WHERE order_id=o.id) item_count FROM Orders o WHERE customer_id=@id ORDER BY created_at DESC;`);
+    SELECT id,created_at,total,status,JSON_VALUE(delivery_json,'$.cancellation.reason') cancellation_reason,(SELECT SUM(quantity) FROM OrderItems WHERE order_id=o.id) item_count FROM Orders o WHERE customer_id=@id ORDER BY created_at DESC;`);
   const recordsets = result.recordsets as sql.IRecordSet<Record<string, unknown>>[];
   const profile = recordsets[0][0];
-  return json({ isAdmin:identity.admin, name: profile.name, email: profile.email, phone: profile.phone, loyalty: { completedPurchases: profile.purchase_count || 0, cycleSpend: money(profile.cycle_spend), freeShippingAvailable: profile.free_shipping, creditAvailable: money(profile.credit) }, orders: recordsets[1].map(o => ({ id:o.id, createdAt:o.created_at, total:money(o.total), status:o.status, itemCount:o.item_count })) });
+  return json({ isAdmin:identity.admin, name: profile.name, email: profile.email, phone: profile.phone, loyalty: { completedPurchases: profile.purchase_count || 0, cycleSpend: money(profile.cycle_spend), freeShippingAvailable: profile.free_shipping, creditAvailable: money(profile.credit) }, orders: recordsets[1].map(o => ({ id:o.id, createdAt:o.created_at, total:money(o.total), status:o.status, itemCount:o.item_count, cancellationReason:o.cancellation_reason })) });
 }) });
 
 app.http("orders", { methods: ["POST"], authLevel: "anonymous", route: "orders", handler: (request) => optionallySecured(request, async identity => {
@@ -218,7 +218,32 @@ app.http("dashboardOrders", { methods:["GET"], authLevel:"anonymous", route:"das
     ORDER BY CASE WHEN o.status='pending' THEN 0 ELSE 1 END,o.created_at DESC;
     SELECT COUNT(*) total,SUM(CASE WHEN status='pending' THEN 1 ELSE 0 END) pending,SUM(CASE WHEN status='paid' THEN 1 ELSE 0 END) paid,SUM(CASE WHEN status='cancelled' THEN 1 ELSE 0 END) cancelled FROM Orders;`);
   const sets=result.recordsets as sql.IRecordSet<Record<string,unknown>>[];
-  return json({orders:sets[0].map(order=>({...order,items:JSON.parse(String(order.items||"[]")),delivery:JSON.parse(String(order.delivery_json||"{}")),delivery_json:undefined})),stats:sets[1][0]||{total:0,pending:0,paid:0,cancelled:0}});
+  return json({orders:sets[0].map(order=>{const delivery=JSON.parse(String(order.delivery_json||"{}"));const cancellation=delivery.cancellation;delete delivery.cancellation;return {...order,items:JSON.parse(String(order.items||"[]")),delivery,cancellation,delivery_json:undefined};}),stats:sets[1][0]||{total:0,pending:0,paid:0,cancelled:0}});
+}) });
+
+app.http("cancelDashboardOrder", { methods:["POST"], authLevel:"anonymous", route:"dashboard-orders/{id}/cancel", handler:(request)=>secured(request,async identity=>{
+  if(!identity.admin) throw new Error("FORBIDDEN");
+  const id=request.params.id;
+  if(!id||!/^[0-9a-f-]{36}$/i.test(id)) return json({message:"Pedido no válido."},400);
+  const input=await request.json() as {reason?:string};
+  const reason=String(input.reason||"").trim();
+  if(reason.length<10||reason.length>500) return json({message:"Escribe un motivo de cancelación de 10 a 500 caracteres."},400);
+  const pool=await database();const tx=new sql.Transaction(pool);await tx.begin(sql.ISOLATION_LEVEL.SERIALIZABLE);
+  try{
+    const order=(await new sql.Request(tx).input("id",sql.UniqueIdentifier,id).query(`SELECT customer_id,status,delivery_json FROM Orders WITH(UPDLOCK,HOLDLOCK) WHERE id=@id`)).recordset[0];
+    if(!order){await tx.rollback();return json({message:"Pedido no encontrado."},404);}
+    if(order.status!=="pending"){await tx.rollback();return json({message:"Solo se pueden cancelar pedidos pendientes."},409);}
+    const delivery=JSON.parse(String(order.delivery_json||"{}"));
+    const freeShippingRestored=delivery.freeShippingRedeemed==="Sí";
+    const creditRestored=Number(delivery.creditApplied||0);
+    if(!String(order.customer_id).startsWith("guest:")){
+      if(freeShippingRestored) await new sql.Request(tx).input("customer",sql.NVarChar,order.customer_id).input("order",sql.UniqueIdentifier,id).query(`INSERT Benefits(customer_id,source_order_id,kind,amount) VALUES(@customer,@order,'free_shipping',0)`);
+      if(Number.isFinite(creditRestored)&&creditRestored>0) await new sql.Request(tx).input("customer",sql.NVarChar,order.customer_id).input("order",sql.UniqueIdentifier,id).input("amount",sql.Decimal(12,2),creditRestored).query(`INSERT Benefits(customer_id,source_order_id,kind,amount) VALUES(@customer,@order,'credit',@amount)`);
+    }
+    delivery.cancellation={reason,by:identity.email,at:new Date().toISOString()};
+    await new sql.Request(tx).input("id",sql.UniqueIdentifier,id).input("delivery",sql.NVarChar,JSON.stringify(delivery)).query(`UPDATE Orders SET status='cancelled',delivery_json=@delivery WHERE id=@id`);
+    await tx.commit();return json({ok:true,freeShippingRestored,creditRestored:Number.isFinite(creditRestored)?creditRestored:0});
+  }catch(error){await tx.rollback();throw error;}
 }) });
 
 app.http("inventory", { methods:["GET"], authLevel:"anonymous", route:"inventory", handler:(request) => secured(request, async identity => {

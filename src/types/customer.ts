@@ -6,6 +6,7 @@ export type CustomerOrder = {
   total: number;
   status: OrderStatus;
   itemCount: number;
+  cancellationReason?: string | null;
 };
 
 export type LoyaltySummary = {
