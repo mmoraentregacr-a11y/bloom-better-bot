@@ -7,7 +7,7 @@ const json = (body: unknown, status = 200): HttpResponseInit => ({ status, jsonB
 const money = (value: unknown) => Math.round(Number(value) * 100) / 100;
 const normalizePlace = (value:unknown) => String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
 const allowedProvinces=new Set(["san jose","alajuela","cartago","heredia"]);
-const excludedAlajuelaCantons=new Set(["san carlos","los chiles","orotina","zarcero","guatuso","upala","san mateo","rio cuarto"]);
+const excludedAlajuelaCantons=new Set(["san carlos","los chiles","orotina","zarcero","guatuso","upala","san mateo","rio cuarto","sarchi","grecia","naranjo","san ramon","palmares"]);
 const deliverySupported=(delivery:Record<string,string>)=>allowedProvinces.has(normalizePlace(delivery.provincia))&&!(normalizePlace(delivery.provincia)==="alajuela"&&excludedAlajuelaCantons.has(normalizePlace(delivery.canton)));
 const freeDeliveryZone = (delivery:Record<string,string>) => {
   const province=normalizePlace(delivery.provincia),canton=normalizePlace(delivery.canton),district=normalizePlace(delivery.distrito);

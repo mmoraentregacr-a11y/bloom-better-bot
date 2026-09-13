@@ -17,7 +17,7 @@ const PROVINCIAS = [
 ];
 const PROVINCE_IDS: Record<string, number> = Object.fromEntries(PROVINCIAS.map((name,index)=>[name,index+1]));
 const normalizePlace = (value:string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
-const excludedAlajuelaCantons = new Set(["san carlos","los chiles","orotina","zarcero","guatuso","upala","san mateo","rio cuarto"]);
+const excludedAlajuelaCantons = new Set(["san carlos","los chiles","orotina","zarcero","guatuso","upala","san mateo","rio cuarto","sarchi","grecia","naranjo","san ramon","palmares"]);
 const isSupportedDelivery = (provincia:string,canton:string) => PROVINCIAS.includes(provincia)&&!(normalizePlace(provincia)==="alajuela"&&excludedAlajuelaCantons.has(normalizePlace(canton)));
 const isFreeDeliveryZone = (provincia:string,canton:string,distrito:string) => {
   const p=normalizePlace(provincia),c=normalizePlace(canton),d=normalizePlace(distrito);
