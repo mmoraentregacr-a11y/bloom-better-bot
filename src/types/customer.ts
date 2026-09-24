@@ -12,6 +12,7 @@ export type CustomerOrder = {
 export type LoyaltySummary = {
   completedPurchases: number;
   cycleSpend: number;
+  discountAvailable: boolean;
   freeShippingAvailable: boolean;
   creditAvailable: number;
 };

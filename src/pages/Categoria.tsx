@@ -14,6 +14,7 @@ const Categoria = () => {
     "boda": "Boda",
     "dulces": "Dulces",
     "peluches": "Peluches",
+    "globos": "Globos",
     "hombres": "Hombres",
     "mujeres": "Mujeres",
   };

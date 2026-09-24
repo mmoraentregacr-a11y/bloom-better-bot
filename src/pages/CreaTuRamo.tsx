@@ -6,6 +6,10 @@ import { customerApi } from "@/lib/api";
 import { azureConfigured } from "@/lib/azure";
 import { useCart } from "@/context/CartContext";
 import { toast } from "@/hooks/use-toast";
+import { koreanPapers, koreanPaperSku } from "@/data/koreanPapers";
+import { balloons, balloonBySku } from "@/data/balloons";
+import { flowerBySku } from "@/data/flowers";
+import { sweets, sweetBySku } from "@/data/sweets";
 
 type Selection = Record<string, number>;
 type BuilderOption = { id:string; sku:string; group:"flower"|"wrap"|"addon"; name:string; color?:string; price:number; min:number; max:number };
@@ -29,20 +33,11 @@ const previewOptions: BuilderOption[] = [
   { id:"clavel-blanco",sku:"FLR-CLAVEL-BLANCO",group:"flower",name:"Clavel",color:"Blanco",price:900,min:0,max:100 },
   { id:"clavel-rosa",sku:"FLR-CLAVEL-ROSA",group:"flower",name:"Clavel",color:"Rosa",price:900,min:0,max:100 },
   { id:"girasol-amarillo",sku:"FLR-GIRASOL-AMARILLO",group:"flower",name:"Girasol",color:"Amarillo",price:2200,min:0,max:30 },
-  { id:"kor-rosa",sku:"WRP-KOR-ROSA",group:"wrap" as const,name:"Papel coreano",color:"Rosa",price:0,min:0,max:1 },
-  { id:"kor-blanco",sku:"WRP-KOR-BLANCO",group:"wrap" as const,name:"Papel coreano",color:"Blanco",price:0,min:0,max:1 },
-  { id:"kor-negro",sku:"WRP-KOR-NEGRO",group:"wrap" as const,name:"Papel coreano",color:"Negro",price:0,min:0,max:1 },
-  { id:"kor-rojo",sku:"WRP-KOR-ROJO",group:"wrap" as const,name:"Papel coreano",color:"Rojo",price:0,min:0,max:1 },
-  { id:"kor-lila",sku:"WRP-KOR-LILA",group:"wrap" as const,name:"Papel coreano",color:"Lila",price:0,min:0,max:1 },
-  { id:"globo-rojo",sku:"ADD-GLOBO-ROJO",group:"addon",name:"Globo",color:"Rojo",price:3500,min:0,max:5 },
-  { id:"globo-rosa",sku:"ADD-GLOBO-ROSA",group:"addon",name:"Globo",color:"Rosa",price:3500,min:0,max:5 },
-  { id:"globo-dorado",sku:"ADD-GLOBO-DORADO",group:"addon",name:"Globo",color:"Dorado",price:3500,min:0,max:5 },
+  ...koreanPapers.map(paper => ({ id:`kor-${paper.photo}`,sku:koreanPaperSku(paper.photo),group:"wrap" as const,name:"Papel coreano",color:paper.color,price:0,min:0,max:1 })),
+  ...balloons.map(balloon => ({ id:`globo-${balloon.code.toLowerCase()}`,sku:balloon.sku,group:"addon" as const,name:"Globo",color:balloon.label,price:1500,min:0,max:5 })),
   { id:"peluche-mediano",sku:"ADD-PELUCHE-MED",group:"addon",name:"Peluche",color:"Oso mediano",price:7500,min:0,max:5 },
   { id:"peluche-grande",sku:"ADD-PELUCHE-GDE",group:"addon",name:"Peluche",color:"Oso grande",price:12000,min:0,max:5 },
-  { id:"ferrero-4",sku:"ADD-CHO-FERRERO-4",group:"addon",name:"Chocolates",color:"Ferrero Rocher · 4 unidades",price:3500,min:0,max:5 },
-  { id:"ferrero-8",sku:"ADD-CHO-FERRERO-8",group:"addon",name:"Chocolates",color:"Ferrero Rocher · 8 unidades",price:5500,min:0,max:5 },
-  { id:"hershey",sku:"ADD-CHO-HERSHEY",group:"addon",name:"Chocolates",color:"Hershey's",price:3000,min:0,max:5 },
-  { id:"kitkat",sku:"ADD-CHO-KITKAT",group:"addon",name:"Chocolates",color:"KitKat",price:2500,min:0,max:5 },
+  ...sweets.map(sweet => ({ id:`dulce-${sweet.id}`,sku:sweet.sku,group:"addon" as const,name:"Dulce",color:sweet.name,price:sweet.price,min:0,max:5 })),
 ];
 
 const CreaTuRamo = () => {
@@ -91,16 +86,22 @@ const CreaTuRamo = () => {
         <label className="text-xs text-muted-foreground">Cantidad<input type="number" min="1" max={chosen?.max||1} value={draft.quantity} onChange={e=>updateDraft({quantity:Math.max(1,Number(e.target.value))})} className="mt-1 w-20 bg-background border border-border px-3 py-3 text-sm" /></label>
         <button type="button" onClick={addDraft} disabled={!chosen} className="h-[46px] bg-secondary text-secondary-foreground px-5 text-xs uppercase tracking-wider disabled:opacity-40">Agregar</button>
       </div>
+      {group === "flower" && chosen && flowerBySku.has(chosen.sku) && <div className="mt-5 flex items-center gap-4 border border-border bg-background p-3"><img src={flowerBySku.get(chosen.sku)!.image} alt={`Vista previa de ${flowerBySku.get(chosen.sku)!.label}`} className="h-32 w-28 object-contain"/><div><p className="text-xs uppercase tracking-[.2em] text-primary">Vista previa</p><p className="mt-1 font-serif text-xl">{flowerBySku.get(chosen.sku)!.label}</p><p className="text-sm text-muted-foreground">Incluida en el cupo o ₡ 2.000 si es adicional</p></div></div>}
+      {group === "addon" && chosen && balloonBySku.has(chosen.sku) && <div className="mt-5 flex items-center gap-4 border border-border bg-background p-3"><img src={balloonBySku.get(chosen.sku)!.image} alt={`Vista previa de ${chosen.color}`} className="h-32 w-28 object-cover"/><div><p className="text-xs uppercase tracking-[.2em] text-primary">Vista previa</p><p className="mt-1 font-serif text-xl">{chosen.color}</p><p className="text-sm text-muted-foreground">{crc(chosen.price)}</p></div></div>}
+      {group === "addon" && chosen && sweetBySku.has(chosen.sku) && <div className="mt-5 flex items-center gap-4 border border-border bg-background p-3"><img src={sweetBySku.get(chosen.sku)!.image} alt={`Vista previa de ${chosen.color}`} className="h-32 w-28 object-contain"/><div><p className="text-xs uppercase tracking-[.2em] text-primary">Vista previa</p><p className="mt-1 font-serif text-xl">{chosen.color}</p><p className="text-sm text-muted-foreground">{crc(chosen.price)}</p></div></div>}
       {selectedInGroup.length>0&&<div className="mt-6 pt-4 border-t border-border space-y-3">{selectedInGroup.map(o=><div key={o.id} className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-sm font-medium">{o.name} · {o.color}</p><p className="text-[10px] text-muted-foreground uppercase tracking-wider">{o.sku}{group === "addon" ? ` · ${crc(o.price)} c/u` : " · incluido en el cupo o ₡ 2.000 si es adicional"}</p></div><div className="flex items-center border border-border"><button onClick={()=>change(o.id,selection[o.id]-1,o.max,group)} className="p-2"><Minus size={14}/></button><span className="w-9 text-center">{selection[o.id]}</span><button onClick={()=>change(o.id,selection[o.id]+1,o.max,group)} className="p-2"><Plus size={14}/></button></div></div>)}</div>}
     </section>;
   };
 
-  const wrapColors: Record<string, string> = {
-    Rosa: "#e8a6b8",
-    Blanco: "#fffdf8",
-    Negro: "#171717",
-    Rojo: "#b92832",
-    Lila: "#b7a0cf",
+  const paperBySku = new Map(koreanPapers.map(paper => [koreanPaperSku(paper.photo), paper]));
+  const paperSwatch = (sku:string) => {
+    const paper=paperBySku.get(sku);
+    if (!paper) return { backgroundColor: "#d8c3a5" };
+    if (paper.pattern === "dots") return { backgroundColor: paper.swatch, backgroundImage: `radial-gradient(${paper.accent} 2px, transparent 2px)`, backgroundSize: "11px 11px" };
+    if (paper.pattern === "geometric") return { backgroundColor: paper.swatch, backgroundImage: `linear-gradient(45deg, transparent 43%, ${paper.accent} 44%, ${paper.accent} 48%, transparent 49%)` };
+    if (paper.pattern === "border") return { backgroundColor: paper.swatch, boxShadow: `inset 0 0 0 3px ${paper.accent}` };
+    if (paper.accent) return { backgroundImage: `linear-gradient(135deg, ${paper.swatch} 50%, ${paper.accent} 50%)` };
+    return { backgroundColor: paper.swatch };
   };
   const wraps = availableOptions?.filter(o => o.group === "wrap" && o.name === "Papel coreano") || [];
   const selectedWrap = wraps.find(o => selection[o.id]);
@@ -109,9 +110,9 @@ const CreaTuRamo = () => {
     <div className="mt-7 flex flex-wrap gap-5">
       {wraps.map(option => {
         const active = Boolean(selection[option.id]);
-        return <button key={option.id} type="button" onClick={() => change(option.id, active ? 0 : 1, 1, "wrap")} className="group flex flex-col items-center gap-2 min-w-14" aria-label={`Seleccionar papel coreano ${option.color}`} aria-pressed={active}>
-          <span className={`w-9 h-9 rounded-full border-2 shadow-sm transition-all ${active ? "ring-2 ring-primary ring-offset-4 ring-offset-card scale-105" : "border-border group-hover:scale-105"}`} style={{ backgroundColor: wrapColors[option.color || ""] || "#d8c3a5" }} />
-          <span className={`text-xs ${active ? "text-primary font-medium" : "text-muted-foreground"}`}>{option.color}</span>
+        return <button key={option.id} type="button" onClick={() => change(option.id, active ? 0 : 1, 1, "wrap")} className="group flex flex-col items-center gap-2 w-24" aria-label={`Seleccionar papel coreano ${option.color}`} aria-pressed={active}>
+          <span className={`w-9 h-9 rounded-full border-2 shadow-sm transition-all ${active ? "ring-2 ring-primary ring-offset-4 ring-offset-card scale-105" : "border-border group-hover:scale-105"}`} style={paperSwatch(option.sku)} />
+          <span className={`text-xs text-center leading-tight ${active ? "text-primary font-medium" : "text-muted-foreground"}`}>{option.color || "Estándar"}</span>
         </button>;
       })}
     </div>
@@ -120,7 +121,7 @@ const CreaTuRamo = () => {
 
   return <PageLayout><main className="pt-32 pb-24"><header className="container text-center max-w-3xl mb-12"><p className="text-xs tracking-[.4em] uppercase text-primary">Diseñado por ti</p><h1 className="font-serif text-5xl md:text-7xl mt-3">Crea tu ramo</h1><p className="text-muted-foreground mt-5">Elige el tamaño y combina tus flores. Cada flor adicional cuesta ₡ 2.000.</p></header>
     <div className="container grid lg:grid-cols-[1fr_360px] gap-8 items-start">
-      <div className="space-y-6"><section className="bg-card p-6 md:p-8 shadow-soft"><h2 className="font-serif text-3xl mb-5">Elige el tamaño</h2><div className="grid sm:grid-cols-3 gap-3">{(Object.keys(sizes) as BouquetSize[]).map(key => <button key={key} type="button" onClick={() => setSize(key)} aria-pressed={size === key} className={`border p-4 text-left ${size === key ? "border-primary bg-primary/10" : "border-border"}`}><strong className="block font-serif text-xl">{sizes[key].label}</strong><span className="block text-sm mt-1">{sizes[key].flowers} flores</span><span className="block text-primary mt-2">{crc(sizes[key].price)}</span></button>)}</div></section>{options.isLoading ? <p>Cargando opciones…</p> : options.isError ? <p className="border border-destructive/30 p-5">No pudimos cargar el constructor. Intenta nuevamente.</p> : <>{quickSection("flower","Elige tus flores",<Flower2/>,`Selecciona al menos ${sizes[size].flowers} flores. Cada flor adicional cuesta ₡ 2.000.`)}{wrapSection}{quickSection("addon","Agrega detalles",<Gift/>,"Selecciona globos, peluches o chocolates por marca y estilo.")}</>}</div>
+      <div className="space-y-6"><section className="bg-card p-6 md:p-8 shadow-soft"><h2 className="font-serif text-3xl mb-5">Elige el tamaño</h2><div className="grid sm:grid-cols-3 gap-3">{(Object.keys(sizes) as BouquetSize[]).map(key => <button key={key} type="button" onClick={() => setSize(key)} aria-pressed={size === key} className={`border p-4 text-left ${size === key ? "border-primary bg-primary/10" : "border-border"}`}><strong className="block font-serif text-xl">{sizes[key].label}</strong><span className="block text-sm mt-1">{sizes[key].flowers} flores</span><span className="block text-primary mt-2">{crc(sizes[key].price)}</span></button>)}</div></section>{options.isLoading ? <p>Cargando opciones…</p> : options.isError ? <p className="border border-destructive/30 p-5">No pudimos cargar el constructor. Intenta nuevamente.</p> : <>{quickSection("flower","Elige tus flores",<Flower2/>,`Selecciona al menos ${sizes[size].flowers} flores. Cada flor adicional cuesta ₡ 2.000.`)}{wrapSection}{quickSection("addon","Agrega detalles",<Gift/>,"Selecciona globos, peluches y dulces por nombre o estilo.")}</>}</div>
       <aside className="lg:sticky lg:top-28 bg-secondary text-secondary-foreground p-7 shadow-elegant"><p className="text-xs tracking-[.3em] uppercase text-primary">Tu creación</p><h2 className="font-serif text-3xl mt-2">Ramo {sizes[size].label.toLowerCase()}</h2><div className="my-6 space-y-3 min-h-24"><div className="flex justify-between gap-3 text-sm"><span>Base · {sizes[size].flowers} flores</span><span>{crc(sizes[size].price)}</span></div>{selected.map(o => <div key={o.id} className="flex justify-between gap-3 text-sm"><span>{selection[o.id]} × {o.color ? `${o.name} ${o.color}` : o.name}</span>{o.group !== "flower" && <span>{crc(o.price * selection[o.id])}</span>}</div>)}{extraFlowers > 0 && <div className="flex justify-between gap-3 text-sm"><span>{extraFlowers} flores adicionales × ₡ 2.000</span><span>{crc(extraFlowers * 2000)}</span></div>}{flowerCount < sizes[size].flowers && <p className="text-sm text-secondary-foreground/60">Faltan {sizes[size].flowers - flowerCount} flores para completar el ramo.</p>}</div><div className="border-t border-primary/30 pt-5 flex items-baseline justify-between"><span className="text-xs uppercase tracking-wider">Total</span><strong className="font-serif text-3xl text-primary">{crc(total)}</strong></div><button onClick={addBouquet} disabled={!availableOptions || flowerCount < sizes[size].flowers} className="w-full mt-6 bg-primary text-primary-foreground py-4 text-xs tracking-[.2em] uppercase flex items-center justify-center gap-2 disabled:opacity-40"><ShoppingBag size={15}/> Agregar al carrito</button></aside>
     </div>
   </main></PageLayout>;

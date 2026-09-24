@@ -24,15 +24,16 @@ const navItems: NavItem[] = [
     children: [
       { to: "/regalos/dulces", label: "Dulces" },
       { to: "/regalos/peluches", label: "Peluches" },
+      { to: "/regalos/globos", label: "Globos" },
     ],
   },
-  {
-    label: "Perfumes",
-    children: [
-      { to: "/perfumes/hombres", label: "Hombres" },
-      { to: "/perfumes/mujeres", label: "Mujeres" },
-    ],
-  },
+  // Menú estacional oculto temporalmente.
+  // {
+  //   label: "21 Septiembre",
+  //   children: [
+  //     { to: "/21-septiembre", label: "Flores amarillas" },
+  //   ],
+  // },
   { to: "/suscripcion", label: "Miembro Golden" },
 ];
 

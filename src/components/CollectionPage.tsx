@@ -14,8 +14,8 @@ type Props = {
 };
 
 const CollectionPage = ({ eyebrow, title, description, heroImage, products, catalog }: Props) => {
-  const liveCatalog = useQuery({ queryKey: ["catalog", catalog], queryFn: () => customerApi.catalog(catalog), enabled: azureConfigured });
-  const displayedProducts = azureConfigured && liveCatalog.data?.length
+  const liveCatalog = useQuery({ queryKey: ["catalog", catalog], queryFn: () => customerApi.catalog(catalog), enabled: azureConfigured && Boolean(catalog) });
+  const displayedProducts = azureConfigured && catalog && liveCatalog.data?.length
     ? liveCatalog.data
     : products;
   return (
@@ -41,8 +41,8 @@ const CollectionPage = ({ eyebrow, title, description, heroImage, products, cata
     {/* Products */}
     <section className="container py-24">
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14">
-        {liveCatalog.isLoading && <p className="col-span-full text-center text-muted-foreground">Cargando catálogo…</p>}
-        {liveCatalog.isError && <p className="col-span-full text-center text-destructive">No pudimos cargar los productos.</p>}
+        {liveCatalog.isLoading && displayedProducts.length === 0 && <p className="col-span-full text-center text-muted-foreground">Cargando catálogo…</p>}
+        {liveCatalog.isError && displayedProducts.length === 0 && <p className="col-span-full text-center text-destructive">No pudimos cargar los productos.</p>}
         {displayedProducts.map((p, i) => (
           <ProductCard key={`${p.id || p.name}-${i}`} product={p} />
         ))}

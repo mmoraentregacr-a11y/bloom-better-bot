@@ -38,7 +38,7 @@ CREATE TABLE Benefits (
   id uniqueidentifier NOT NULL DEFAULT NEWID() PRIMARY KEY,
   customer_id nvarchar(128) NOT NULL REFERENCES Customers(id),
   source_order_id uniqueidentifier NOT NULL REFERENCES Orders(id),
-  kind varchar(24) NOT NULL CHECK(kind IN ('free_shipping','credit')),
+  kind varchar(24) NOT NULL CHECK(kind IN ('free_shipping','credit','discount_10')),
   amount decimal(12,2) NOT NULL DEFAULT 0,
   created_at datetime2 NOT NULL DEFAULT SYSUTCDATETIME(),
   redeemed_at datetime2 NULL
@@ -46,4 +46,3 @@ CREATE TABLE Benefits (
 
 CREATE INDEX IX_Orders_Customer ON Orders(customer_id,created_at DESC);
 CREATE INDEX IX_Benefits_Customer ON Benefits(customer_id,redeemed_at);
-

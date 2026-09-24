@@ -37,7 +37,7 @@ export const customerApi = {
     return response.json() as Promise<Array<{ id: string; sku: string; group: "flower" | "wrap" | "addon"; name: string; color?: string; price: number; min: number; max: number }>>;
   },
   dashboard: (account: AccountInfo) => authenticatedFetch<CustomerDashboard>(account, "/me"),
-  createOrder: (account: AccountInfo, payload: { items: CartItem[]; delivery: Record<string, string>; redeemFreeShipping?:boolean; redeemCredit?:boolean }) =>
+  createOrder: (account: AccountInfo, payload: { items: CartItem[]; delivery: Record<string, string>; redeemDiscount?:boolean; redeemFreeShipping?:boolean; redeemCredit?:boolean }) =>
     authenticatedFetch<OrderInvoice>(account, "/orders", {
       method: "POST",
       body: JSON.stringify(payload),
@@ -52,5 +52,5 @@ export const customerApi = {
 export type OrderInvoice = {
   id:string; invoiceNumber:string; createdAt:string; currency:"CRC";
   items:Array<{sku:string;name:string;quantity:number;unitPrice:number;lineSubtotal:number;configuration?:Array<{sku:string;name:string;quantity:number;unitPrice:number}>}>;
-  delivery:Record<string,string>; productTotal:number; shippingFee:number; creditApplied:number; freeShippingRedeemed:boolean; subtotal:number; taxRate:number; taxAmount:number; total:number; notificationSent:boolean; customerNotificationSent:boolean; loyaltyEligible:boolean;
+  delivery:Record<string,string>; productTotal:number; discountApplied:number; shippingFee:number; creditApplied:number; freeShippingRedeemed:boolean; subtotal:number; taxRate:number; taxAmount:number; total:number; notificationSent:boolean; customerNotificationSent:boolean; loyaltyEligible:boolean;
 };

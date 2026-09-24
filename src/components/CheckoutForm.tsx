@@ -17,8 +17,23 @@ const PROVINCIAS = [
 ];
 const PROVINCE_IDS: Record<string, number> = Object.fromEntries(PROVINCIAS.map((name,index)=>[name,index+1]));
 const normalizePlace = (value:string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
-const excludedAlajuelaCantons = new Set(["san carlos","los chiles","orotina","zarcero","guatuso","upala","san mateo","rio cuarto","sarchi","grecia","naranjo","san ramon","palmares"]);
-const isSupportedDelivery = (provincia:string,canton:string) => PROVINCIAS.includes(provincia)&&!(normalizePlace(provincia)==="alajuela"&&excludedAlajuelaCantons.has(normalizePlace(canton)));
+const excludedCantons: Record<string,Set<string>> = {
+  alajuela: new Set(["san carlos","los chiles","orotina","zarcero","guatuso","upala","san mateo","rio cuarto","sarchi","grecia","naranjo","san ramon","palmares","atenas","poas"]),
+  cartago: new Set(["alvarado","jimenez","turrialba"]),
+  heredia: new Set(["sarapiqui"]),
+};
+const excludedDistricts: Record<string,Record<string,Set<string>>> = {
+  alajuela: { central: new Set(["sarapiqui"]) },
+  cartago: {
+    central: new Set(["corralillo"]),
+    paraiso: new Set(["orosi","cachi","santiago"]),
+    oreamuno: new Set(["cipreses","santa rosa"]),
+  },
+  heredia: { central: new Set(["varablanca","vara blanca"]) },
+};
+const isExcludedCanton = (provincia:string,canton:string) => excludedCantons[normalizePlace(provincia)]?.has(normalizePlace(canton)) ?? false;
+const isExcludedDistrict = (provincia:string,canton:string,distrito:string) => excludedDistricts[normalizePlace(provincia)]?.[normalizePlace(canton)]?.has(normalizePlace(distrito)) ?? false;
+const isSupportedDelivery = (provincia:string,canton:string,distrito="") => PROVINCIAS.includes(provincia)&&!isExcludedCanton(provincia,canton)&&!isExcludedDistrict(provincia,canton,distrito);
 const isFreeDeliveryZone = (provincia:string,canton:string,distrito:string) => {
   const p=normalizePlace(provincia),c=normalizePlace(canton),d=normalizePlace(distrito);
   return p==="san jose"&&((c==="desamparados"&&d==="desamparados")||(["central","san jose"].includes(c)&&["san francisco de dos rios","san sebastian"].includes(d)));
@@ -59,7 +74,7 @@ const schema = z.object({
   if(value.pickup) return;
   const required: Array<[keyof typeof value,string,number]> = [["recibeNombre","Nombre de quien recibe requerido",2],["recibeTel","Teléfono de quien recibe inválido",8],["provincia","Selecciona una provincia",1],["canton","Selecciona un cantón",2],["distrito","Selecciona un distrito",2],["direccion","Dirección exacta requerida",5]];
   for(const [key,message,min] of required) if(String(value[key]).trim().length<min) ctx.addIssue({code:z.ZodIssueCode.custom,path:[key],message});
-  if(value.provincia&&value.canton&&!isSupportedDelivery(value.provincia,value.canton)) ctx.addIssue({code:z.ZodIssueCode.custom,path:["canton"],message:"No realizamos entregas en esta zona."});
+  if(value.provincia&&value.canton&&!isSupportedDelivery(value.provincia,value.canton,value.distrito)) ctx.addIssue({code:z.ZodIssueCode.custom,path:[isExcludedDistrict(value.provincia,value.canton,value.distrito)?"distrito":"canton"],message:"No realizamos entregas en esta zona."});
 });
 
 type FormData = z.infer<typeof schema>;
@@ -100,6 +115,7 @@ const CheckoutForm = ({ onCancel }: { onCancel: () => void }) => {
   const [showGuestChoice,setShowGuestChoice]=useState(false);
   const [loyalty,setLoyalty]=useState<LoyaltySummary|null>(null);
   const [loyaltyError,setLoyaltyError]=useState(false);
+  const [redeemDiscount,setRedeemDiscount]=useState(false);
   const [redeemFreeShipping,setRedeemFreeShipping]=useState(false);
   const [redeemCredit,setRedeemCredit]=useState(false);
   const [cantons,setCantons]=useState<Record<string,string>>({});
@@ -116,13 +132,13 @@ const CheckoutForm = ({ onCancel }: { onCancel: () => void }) => {
   useEffect(()=>{
     if(!provinceId){setCantons({});return;}
     let active=true;
-    locationOptions(`/provincia/${provinceId}/cantones.json`).then(options=>{if(active){setCantons(provinceId===2?Object.fromEntries(Object.entries(options).filter(([,name])=>!excludedAlajuelaCantons.has(normalizePlace(name)))):options);setLocationsError(false);}}).catch(()=>{if(active)setLocationsError(true);});
+    locationOptions(`/provincia/${provinceId}/cantones.json`).then(options=>{if(active){setCantons(Object.fromEntries(Object.entries(options).filter(([,name])=>!isExcludedCanton(data.provincia,name))));setLocationsError(false);}}).catch(()=>{if(active)setLocationsError(true);});
     return ()=>{active=false;};
   },[provinceId]);
   useEffect(()=>{
     if(!provinceId||!cantonEntry){setDistricts({});return;}
     let active=true;
-    locationOptions(`/provincia/${provinceId}/canton/${cantonEntry[0]}/distritos.json`).then(options=>{if(active){setDistricts(options);setLocationsError(false);}}).catch(()=>{if(active)setLocationsError(true);});
+    locationOptions(`/provincia/${provinceId}/canton/${cantonEntry[0]}/distritos.json`).then(options=>{if(active){setDistricts(Object.fromEntries(Object.entries(options).filter(([,name])=>!isExcludedDistrict(data.provincia,data.canton,name))));setLocationsError(false);}}).catch(()=>{if(active)setLocationsError(true);});
     return ()=>{active=false;};
   },[provinceId,cantonEntry?.[0]]);
 
@@ -139,7 +155,7 @@ const CheckoutForm = ({ onCancel }: { onCancel: () => void }) => {
     setSubmitting(true);
     let created:OrderInvoice;
     const delivery={...d,pickup:d.pickup?"Sí":"No",...(d.pickup?{recibeNombre:"",recibeTel:"",provincia:"",canton:"",distrito:"",direccion:""}:{})};
-    try { created=asGuest?await customerApi.createGuestOrder({items,delivery}):await customerApi.createOrder(account!,{items,delivery,redeemFreeShipping,redeemCredit}); }
+    try { created=asGuest?await customerApi.createGuestOrder({items,delivery}):await customerApi.createOrder(account!,{items,delivery,redeemDiscount,redeemFreeShipping,redeemCredit}); }
     catch(error){toast({title:"No pudimos registrar el pedido",description:error instanceof Error?error.message:undefined,variant:"destructive"});setSubmitting(false);return;}
     const lines: string[] = [];
     lines.push("*🌸 NUEVO PEDIDO — GOLDEN BLOOM*");
@@ -162,6 +178,7 @@ const CheckoutForm = ({ onCancel }: { onCancel: () => void }) => {
     lines.push("");
     lines.push(`Subtotal sin IVA: ${fmtCRC(created.subtotal)}`);
     lines.push(`IVA incluido (${created.taxRate*100}%): ${fmtCRC(created.taxAmount)}`);
+    if(created.discountApplied) lines.push(`Descuento de lealtad (10%): −${fmtCRC(created.discountApplied)}`);
     if(created.creditApplied) lines.push(`Crédito de lealtad aplicado: −${fmtCRC(created.creditApplied)}`);
     if(created.freeShippingRedeemed) lines.push("Beneficio de envío gratis redimido");
     lines.push(`Envío: ${fmtCRC(created.shippingFee)}`);
@@ -208,7 +225,7 @@ const CheckoutForm = ({ onCancel }: { onCancel: () => void }) => {
     const whatsapp=()=>window.open(`https://wa.me/${ORDER_WHATSAPP}?text=${encodeURIComponent(sessionStorage.getItem("golden-bloom-order-whatsapp")||"")}`,"_blank","noopener,noreferrer");
     return <section className="space-y-6" aria-label="Orden de compra">
       <div className="text-center"><CheckCircle2 className="mx-auto text-primary" size={42}/><p className="text-xs tracking-[.3em] uppercase text-primary mt-3">Solicitud recibida</p><h3 className="font-serif text-3xl mt-2">Orden de compra</h3><p className="font-mono text-sm mt-1">{invoice.invoiceNumber}</p><p className="text-xs text-muted-foreground">{new Date(invoice.createdAt).toLocaleString("es-CR")}</p></div>
-      <div className="border border-border bg-card p-5 space-y-4"><div className="grid grid-cols-[1fr_auto_auto] gap-3 text-[10px] uppercase tracking-wider text-muted-foreground"><span>Detalle</span><span>Cant.</span><span>Importe</span></div>{invoice.items.map((item,index)=><div key={`${item.sku}-${index}`} className="grid grid-cols-[1fr_auto_auto] gap-3 border-t border-border pt-3 text-sm"><div><strong>{item.name}</strong><p className="text-xs text-muted-foreground">{item.sku} · {fmtCRC(item.unitPrice)} c/u (IVA incluido)</p>{item.configuration?.map(option=><p key={option.sku} className="text-xs text-muted-foreground mt-1">↳ {option.quantity} × {option.name} ({fmtCRC(option.unitPrice)} c/u)</p>)}</div><span>{item.quantity}</span><span className="tabular-nums">{fmtCRC(item.lineSubtotal)}</span></div>)}<dl className="border-t border-border pt-4 space-y-2 text-sm"><div className="flex justify-between"><dt>Productos</dt><dd>{fmtCRC(invoice.productTotal)}</dd></div><div className="flex justify-between"><dt>Envío</dt><dd>{fmtCRC(invoice.shippingFee)}</dd></div>{invoice.creditApplied>0&&<div className="flex justify-between text-primary"><dt>Crédito de lealtad</dt><dd>−{fmtCRC(invoice.creditApplied)}</dd></div>}{invoice.freeShippingRedeemed&&<div className="flex justify-between text-primary"><dt>Beneficio de envío gratis</dt><dd>Redimido</dd></div>}<div className="flex justify-between"><dt>Subtotal sin IVA</dt><dd>{fmtCRC(invoice.subtotal)}</dd></div><div className="flex justify-between"><dt>IVA incluido ({invoice.taxRate*100}%)</dt><dd>{fmtCRC(invoice.taxAmount)}</dd></div><div className="flex justify-between font-serif text-xl text-primary"><dt>Total</dt><dd>{fmtCRC(invoice.total)}</dd></div></dl></div>
+      <div className="border border-border bg-card p-5 space-y-4"><div className="grid grid-cols-[1fr_auto_auto] gap-3 text-[10px] uppercase tracking-wider text-muted-foreground"><span>Detalle</span><span>Cant.</span><span>Importe</span></div>{invoice.items.map((item,index)=><div key={`${item.sku}-${index}`} className="grid grid-cols-[1fr_auto_auto] gap-3 border-t border-border pt-3 text-sm"><div><strong>{item.name}</strong><p className="text-xs text-muted-foreground">{item.sku} · {fmtCRC(item.unitPrice)} c/u (IVA incluido)</p>{item.configuration?.map(option=><p key={option.sku} className="text-xs text-muted-foreground mt-1">↳ {option.quantity} × {option.name} ({fmtCRC(option.unitPrice)} c/u)</p>)}</div><span>{item.quantity}</span><span className="tabular-nums">{fmtCRC(item.lineSubtotal)}</span></div>)}<dl className="border-t border-border pt-4 space-y-2 text-sm"><div className="flex justify-between"><dt>Productos</dt><dd>{fmtCRC(invoice.productTotal)}</dd></div>{invoice.discountApplied>0&&<div className="flex justify-between text-primary"><dt>Descuento de lealtad (10%)</dt><dd>−{fmtCRC(invoice.discountApplied)}</dd></div>}<div className="flex justify-between"><dt>Envío</dt><dd>{fmtCRC(invoice.shippingFee)}</dd></div>{invoice.creditApplied>0&&<div className="flex justify-between text-primary"><dt>Crédito de lealtad</dt><dd>−{fmtCRC(invoice.creditApplied)}</dd></div>}{invoice.freeShippingRedeemed&&<div className="flex justify-between text-primary"><dt>Beneficio de envío gratis</dt><dd>Redimido</dd></div>}<div className="flex justify-between"><dt>Subtotal sin IVA</dt><dd>{fmtCRC(invoice.subtotal)}</dd></div><div className="flex justify-between"><dt>IVA incluido ({invoice.taxRate*100}%)</dt><dd>{fmtCRC(invoice.taxAmount)}</dd></div><div className="flex justify-between font-serif text-xl text-primary"><dt>Total</dt><dd>{fmtCRC(invoice.total)}</dd></div></dl></div>
       <p className={`text-xs border p-3 ${invoice.notificationSent&&invoice.customerNotificationSent?"border-primary/30":"border-amber-500/40"}`}>{invoice.notificationSent&&invoice.customerNotificationSent?"Enviamos la factura a tu correo y notificamos a los administradores.":invoice.customerNotificationSent?"Enviamos tu factura por correo; la solicitud también está guardada en el panel administrativo.":"La solicitud está guardada, pero no se pudo enviar la copia por correo."}</p>
       <div className="grid sm:grid-cols-2 gap-3"><button type="button" onClick={()=>window.print()} className="border border-foreground/30 px-4 py-3 text-xs uppercase tracking-wider inline-flex justify-center items-center gap-2"><Printer size={15}/> Imprimir / PDF</button><button type="button" onClick={whatsapp} className="border border-foreground/30 px-4 py-3 text-xs uppercase tracking-wider inline-flex justify-center items-center gap-2"><MessageCircle size={15}/> WhatsApp</button></div>
       <button type="button" onClick={finish} className="w-full bg-primary text-primary-foreground px-5 py-4 text-xs uppercase tracking-[.25em]">Ir a mi cuenta</button>
@@ -333,9 +350,9 @@ const CheckoutForm = ({ onCancel }: { onCancel: () => void }) => {
         />
       </section>
 
-      {account&&(loyalty?.freeShippingAvailable||Number(loyalty?.creditAvailable)>0)&&<section className="space-y-4 border border-primary/30 bg-primary/5 p-5" aria-label="Redimir beneficios"><h3 className="font-serif text-xl">Tus beneficios disponibles</h3>{loyalty?.freeShippingAvailable&&<label className="flex items-start gap-3 cursor-pointer"><input type="checkbox" checked={redeemFreeShipping} onChange={event=>setRedeemFreeShipping(event.target.checked)} disabled={data.pickup||isFreeDeliveryZone(data.provincia,data.canton,data.distrito)} className="mt-1"/><span><strong>Envío gratis</strong><span className="block text-sm text-muted-foreground">Lo ganaste al completar 5 compras. {data.pickup||isFreeDeliveryZone(data.provincia,data.canton,data.distrito)?"Este pedido ya tiene envío sin costo; guarda el beneficio para otra entrega.":"¿Quieres redimirlo en este pedido?"}</span></span></label>}{Number(loyalty?.creditAvailable)>0&&<label className="flex items-start gap-3 cursor-pointer"><input type="checkbox" checked={redeemCredit} onChange={event=>setRedeemCredit(event.target.checked)} className="mt-1"/><span><strong>Crédito del 10%: {fmtCRC(loyalty!.creditAvailable)} disponible</strong><span className="block text-sm text-muted-foreground">Lo ganaste al completar 10 compras. ¿Quieres aplicar hasta {fmtCRC(Math.min(cartTotal,loyalty!.creditAvailable))} a esta compra? Si sobra crédito, queda disponible para otra compra.</span></span></label>}<p className="text-xs text-muted-foreground">Los beneficios se aplican solo si los seleccionas. El importe definitivo se calcula con los precios vigentes al crear la orden.</p></section>}
+      {account&&(loyalty?.discountAvailable||loyalty?.freeShippingAvailable||Number(loyalty?.creditAvailable)>0)&&<section className="space-y-4 border border-primary/30 bg-primary/5 p-5" aria-label="Redimir beneficios"><h3 className="font-serif text-xl">Tus beneficios disponibles</h3>{loyalty?.discountAvailable&&<label className="flex items-start gap-3 cursor-pointer"><input type="checkbox" checked={redeemDiscount} onChange={event=>setRedeemDiscount(event.target.checked)} className="mt-1"/><span><strong>10% de descuento en productos</strong><span className="block text-sm text-muted-foreground">Lo ganaste al completar 5 compras. ¿Quieres redimirlo en este pedido?</span></span></label>}{loyalty?.freeShippingAvailable&&<label className="flex items-start gap-3 cursor-pointer"><input type="checkbox" checked={redeemFreeShipping} onChange={event=>setRedeemFreeShipping(event.target.checked)} disabled={data.pickup||isFreeDeliveryZone(data.provincia,data.canton,data.distrito)} className="mt-1"/><span><strong>Envío gratis</strong><span className="block text-sm text-muted-foreground">Lo ganaste al completar 8 compras. {data.pickup||isFreeDeliveryZone(data.provincia,data.canton,data.distrito)?"Este pedido ya tiene envío sin costo; guarda el beneficio para otra entrega.":"¿Quieres redimirlo en este pedido?"}</span></span></label>}{Number(loyalty?.creditAvailable)>0&&<label className="flex items-start gap-3 cursor-pointer"><input type="checkbox" checked={redeemCredit} onChange={event=>setRedeemCredit(event.target.checked)} className="mt-1"/><span><strong>Crédito del 10%: {fmtCRC(loyalty!.creditAvailable)} disponible</strong><span className="block text-sm text-muted-foreground">Lo ganaste al completar 10 compras. ¿Quieres aplicar hasta {fmtCRC(Math.min(cartTotal-(redeemDiscount?Math.round(cartTotal*.10*100)/100:0),loyalty!.creditAvailable))} a esta compra? Si sobra crédito, queda disponible para otra compra.</span></span></label>}<p className="text-xs text-muted-foreground">Los beneficios se aplican solo si los seleccionas. El importe definitivo se calcula con los precios vigentes al crear la orden.</p></section>}
       {account&&loyaltyError&&<p className="text-sm text-amber-700">No pudimos consultar tus beneficios. Puedes continuar sin redimirlos y volver a intentarlo después.</p>}
-      <div className="border border-border p-4 text-sm space-y-2" aria-label="Resumen estimado"><div className="flex justify-between"><span>Productos</span><span>{fmtCRC(cartTotal)}</span></div><div className="flex justify-between"><span>Envío {data.pickup?"(retiro)":shippingEstimate===0?"(sin costo)":""}</span><span>{fmtCRC(shippingEstimate)}</span></div>{redeemCredit&&loyalty&&<div className="flex justify-between text-primary"><span>Crédito de lealtad estimado</span><span>−{fmtCRC(Math.min(cartTotal,loyalty.creditAvailable))}</span></div>}<div className="flex justify-between font-semibold border-t border-border pt-2"><span>Total estimado</span><span>{fmtCRC(Math.max(0,cartTotal+shippingEstimate-(redeemCredit&&loyalty?Math.min(cartTotal,loyalty.creditAvailable):0)))}</span></div></div>
+      <div className="border border-border p-4 text-sm space-y-2" aria-label="Resumen estimado"><div className="flex justify-between"><span>Productos</span><span>{fmtCRC(cartTotal)}</span></div>{redeemDiscount&&<div className="flex justify-between text-primary"><span>Descuento del 10% estimado</span><span>−{fmtCRC(Math.round(cartTotal*.10*100)/100)}</span></div>}<div className="flex justify-between"><span>Envío {data.pickup?"(retiro)":shippingEstimate===0?"(sin costo)":""}</span><span>{fmtCRC(shippingEstimate)}</span></div>{redeemCredit&&loyalty&&<div className="flex justify-between text-primary"><span>Crédito de lealtad estimado</span><span>−{fmtCRC(Math.min(cartTotal-(redeemDiscount?Math.round(cartTotal*.10*100)/100:0),loyalty.creditAvailable))}</span></div>}<div className="flex justify-between font-semibold border-t border-border pt-2"><span>Total estimado</span><span>{fmtCRC(Math.max(0,cartTotal-(redeemDiscount?Math.round(cartTotal*.10*100)/100:0)+shippingEstimate-(redeemCredit&&loyalty?Math.min(cartTotal-(redeemDiscount?Math.round(cartTotal*.10*100)/100:0),loyalty.creditAvailable):0)))}</span></div></div>
 
       <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4">
         <button

@@ -1,4 +1,4 @@
-import { Gift, Truck } from "lucide-react";
+import { Gift, Truck, Percent } from "lucide-react";
 import BrandMark from "./BrandMark";
 import type { LoyaltySummary } from "@/types/customer";
 
@@ -25,15 +25,17 @@ const LoyaltyCard = ({ loyalty }: { loyalty: LoyaltySummary }) => {
               <div className={`aspect-square w-full max-w-[78px] rounded-full border flex items-center justify-center transition-all ${complete ? "bg-primary border-primary text-primary-foreground shadow-gold" : "border-primary/45 text-primary/25"}`}>
                 {complete ? <BrandMark className="w-[72%] h-[72%]" /> : <span className="text-xs tabular-nums">{index + 1}</span>}
               </div>
-              {index === 4 && <span className="text-[9px] uppercase tracking-wider text-primary">Envío</span>}
+              {index === 4 && <span className="text-[9px] uppercase tracking-wider text-primary">10%</span>}
+              {index === 7 && <span className="text-[9px] uppercase tracking-wider text-primary">Envío</span>}
               {index === 9 && <span className="text-[9px] uppercase tracking-wider text-primary">10%</span>}
             </div>
           );
         })}
       </div>
 
-      <div className="relative grid sm:grid-cols-2 gap-3 mt-9 pt-6 border-t border-primary/25">
-        <div className="flex gap-3 items-center"><Truck className="text-primary" size={20} /><div><p className="text-xs uppercase tracking-wider">Compra 5</p><p className="text-sm text-secondary-foreground/65">{loyalty.freeShippingAvailable ? "Envío gratis disponible" : "Beneficio al completar 5"}</p></div></div>
+      <div className="relative grid sm:grid-cols-3 gap-3 mt-9 pt-6 border-t border-primary/25">
+        <div className="flex gap-3 items-center"><Percent className="text-primary" size={20} /><div><p className="text-xs uppercase tracking-wider">Compra 5</p><p className="text-sm text-secondary-foreground/65">{loyalty.discountAvailable ? "10% de descuento disponible" : "10% en una próxima compra"}</p></div></div>
+        <div className="flex gap-3 items-center"><Truck className="text-primary" size={20} /><div><p className="text-xs uppercase tracking-wider">Compra 8</p><p className="text-sm text-secondary-foreground/65">{loyalty.freeShippingAvailable ? "Envío gratis disponible" : "Un envío gratis"}</p></div></div>
         <div className="flex gap-3 items-center"><Gift className="text-primary" size={20} /><div><p className="text-xs uppercase tracking-wider">Compra 10</p><p className="text-sm text-secondary-foreground/65">{loyalty.creditAvailable > 0 ? `${crc(loyalty.creditAvailable)} disponibles` : "Crédito del 10% acumulado"}</p></div></div>
       </div>
     </section>

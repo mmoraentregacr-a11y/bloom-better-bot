@@ -1,8 +1,8 @@
 import { FormEvent, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
-import { ClipboardList, Package, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import PageLayout from "@/components/PageLayout";
+import AdminNav from "@/components/AdminNav";
 import { useAuth } from "@/context/AuthContext";
 import { accessToken, apiBaseUrl } from "@/lib/azure";
 import { toast } from "@/hooks/use-toast";
@@ -46,7 +46,7 @@ export default function AdminBuilderOptions() {
   };
   const filtered=options.data?.filter(o=>`${o.sku} ${o.name} ${o.color||""}`.toLowerCase().includes(search.toLowerCase()))||[];
   return <PageLayout><main className="container pt-32 pb-24 min-h-[70vh]">
-    <header className="mb-8 flex flex-wrap justify-between gap-5 items-end"><div><p className="text-xs tracking-[.35em] uppercase text-primary">Administración</p><h1 className="font-serif text-5xl mt-2">Opciones de Crea tu ramo</h1><p className="text-muted-foreground mt-3">Agrega y modifica flores, envolturas y complementos de BuilderOptions.</p></div><nav className="flex gap-4 text-xs uppercase tracking-wider"><Link className="inline-flex items-center gap-2 text-primary" to="/admin/pedidos"><ClipboardList size={16}/> Pedidos</Link><Link className="inline-flex items-center gap-2 text-primary" to="/admin/inventario"><Package size={16}/> Inventario</Link></nav></header>
+    <header className="mb-8 space-y-6"><div><p className="text-xs tracking-[.35em] uppercase text-primary">Administración</p><h1 className="font-serif text-5xl mt-2">Opciones de Crea tu ramo</h1><p className="text-muted-foreground mt-3">Agrega y modifica flores, envolturas y complementos de BuilderOptions.</p></div><AdminNav/></header>
     {!ready?<p>Cargando…</p>:!account?<button onClick={()=>void login()} className="bg-primary text-primary-foreground px-8 py-4 text-xs uppercase">Ingresar como administrador</button>:options.isError?<p className="border border-destructive/30 p-5">{options.error.message}</p>:<div className="grid lg:grid-cols-[minmax(0,1fr)_380px] gap-7 items-start">
       <section><input aria-label="Buscar opción" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar por nombre, color o SKU…" className={`${field} mb-4`}/><div className="bg-card border border-border divide-y divide-border">{options.isLoading?<p className="p-6">Cargando opciones…</p>:filtered.length===0?<p className="p-6 text-muted-foreground">No hay opciones con ese filtro.</p>:filtered.map(option=><article key={option.id} className="p-4 flex flex-wrap justify-between gap-3 items-center"><div><p className="font-medium">{option.name}{option.color?` · ${option.color}`:""}</p><p className="text-xs text-muted-foreground">{option.sku} · {labels[option.group]} · máximo {option.max} · orden {option.displayOrder}{!option.active?" · Oculto":""}</p></div><div className="flex items-center gap-4"><span className="font-serif text-xl">₡ {Number(option.price).toLocaleString("es-CR")}</span><button type="button" onClick={()=>select(option)} className="border border-primary text-primary px-4 py-2 text-xs uppercase">Editar</button></div></article>)}</div></section>
       <form onSubmit={save} className="bg-card border border-border p-6 space-y-4 lg:sticky lg:top-28"><div className="flex justify-between items-center"><h2 className="font-serif text-3xl">{editing?"Editar opción":"Nueva opción"}</h2>{editing&&<button type="button" onClick={reset} className="text-xs text-primary">Cancelar</button>}</div>

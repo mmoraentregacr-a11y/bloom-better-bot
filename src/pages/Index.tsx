@@ -1,21 +1,21 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Truck, Heart, Sparkles, Award } from "lucide-react";
+import { ArrowRight, Truck, Heart, Award } from "lucide-react";
 import PageLayout from "@/components/PageLayout";
 import { useCart } from "@/context/CartContext";
-import heroImg from "@/assets/bannerSept.png";
+// import heroImg from "@/assets/bannerSept.png"; // Promoción 21 de septiembre oculta temporalmente.
 import grandesImg from "@/assets/collection-grandes.jpg";
 import pequenosImg from "@/assets/collection-pequenos.jpg";
 import bodaImg from "@/assets/collection-boda.jpg";
 import regalosImg from "@/assets/collection-regalos.jpg";
-import perfumesImg from "@/assets/collection-perfumes.jpg";
-import ramoMesImg from "@/assets/ramo-mes.jpeg";
+// import perfumesImg from "@/assets/collection-perfumes.jpg"; // Colección de perfumes oculta temporalmente.
+import ramoMesImg from "@/assets/ramo-mes1.jpeg";
 
 const collections = [
   { to: "/grandes", label: "Ramos Grandes", img: grandesImg, desc: "Para los gestos inolvidables" },
   { to: "/pequenos", label: "Ramos Pequeños", img: pequenosImg, desc: "Detalles que enamoran" },
   { to: "/boda", label: "Boda", img: bodaImg, desc: "El día más especial" },
   { to: "/regalos", label: "Regalos", img: regalosImg, desc: "Sorprende con elegancia" },
-  { to: "/perfumes", label: "Perfumes", img: perfumesImg, desc: "Fragancias que cautivan" },
+  // { to: "/perfumes", label: "Perfumes", img: perfumesImg, desc: "Fragancias que cautivan" },
 ];
 
 const testimonials = [
@@ -34,8 +34,8 @@ const Index = () => {
           backgroundImage: 'radial-gradient(circle at 25% 25%, hsl(var(--gold)) 0%, transparent 50%), radial-gradient(circle at 75% 75%, hsl(var(--gold-light)) 0%, transparent 50%)'
         }} />
         <div className="container relative grid lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-6 space-y-8 animate-fade-up">
-        
+          <div className="lg:col-span-12 lg:max-w-3xl space-y-8 animate-fade-up">
+
             <h1 className="font-serif text-5xl md:text-7xl xl:text-8xl leading-[0.95] text-foreground">
               Flores que <br />
               <span className="italic text-gradient-gold">iluminan</span> <br />
@@ -60,58 +60,39 @@ const Index = () => {
               </Link>
             </div>
             {/* VALUE PROPS */}
-      <section className="border-y border-border bg-card">
-        <div className="container grid grid-cols-2 lg:grid-cols-3 gap-8 py-12">
-          {[
-            { icon: Truck, title: "Envíos", desc: "Gran Área Metropolitana" },
-            { icon: Heart, title: "Diseños", desc: "Cada arreglo es único" },
-            { icon: Award, title: "Flores", desc: "Frescura garantizada" },
-          ].map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="flex items-center gap-4">
-              <Icon className="text-primary shrink-0" size={28} strokeWidth={1.2} />
-              <div>
-                <p className="font-serif text-lg leading-tight">{title}</p>
-                <p className="text-xs text-muted-foreground">{desc}</p>
+            <section className="border-y border-border bg-card">
+              <div className="container grid grid-cols-2 lg:grid-cols-3 gap-8 py-12">
+                {[
+                  { icon: Truck, title: "Envíos", desc: "Gran Área Metropolitana" },
+                  { icon: Heart, title: "Diseños", desc: "Cada arreglo es único" },
+                  { icon: Award, title: "Flores", desc: "Frescura garantizada" },
+                ].map(({ icon: Icon, title, desc }) => (
+                  <div key={title} className="flex items-center gap-4">
+                    <Icon className="text-primary shrink-0" size={28} strokeWidth={1.2} />
+                    <div>
+                      <p className="font-serif text-lg leading-tight">{title}</p>
+                      <p className="text-xs text-muted-foreground">{desc}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
-            
+            </section>
+
           </div>
 
-          <div className="lg:col-span-6 relative animate-fade-in">
-            <div className="absolute -inset-8 bg-gradient-gold opacity-20 blur-3xl rounded-full" />
-            <div className="relative aspect-[4/5] max-w-lg mx-auto">
-              <img
-                src={heroImg}
-                alt="Ramo de rosas blancas con lazo dorado"
-                width={1054}
-                height={1492}
-                className="w-full h-full object-cover shadow-elegant"
-              />
-             {/*   <div className="absolute -bottom-6 -left-6 bg-background p-6 shadow-soft max-w-[200px] hidden md:block">
-                <p className="text-[10px] tracking-[0.3em] uppercase text-primary mb-1">Nuevo</p>
-                <p className="font-serif text-lg leading-tight">Colección Primaveral 2026</p>
-              </div>
-              <div className="absolute -top-4 -right-4 bg-primary text-primary-foreground w-24 h-24 rounded-full flex flex-col items-center justify-center text-center hidden md:flex">
-                <Sparkles size={16} />
-                <p className="text-[9px] tracking-widest uppercase mt-1 leading-tight">Hecho<br />a mano</p>
-              </div>*/}
-            </div>
-          </div>
+          {/* Imagen promocional del index oculta temporalmente. */}
         </div>
       </section>
 
-      
+
 
       {/* RAMO DEL MES */}
       <section className="container py-24 md:py-32">
         {/* Mobile Title */}
         <div className="block lg:hidden mb-8 space-y-4">
-          <p className="text-xs tracking-[0.4em] uppercase text-primary">Ramo del mes · Agosto</p>
+          <p className="text-xs tracking-[0.4em] uppercase text-primary">Ramo del mes · Septiembre</p>
           <h2 className="font-serif text-5xl md:text-6xl leading-tight">
-            Girasol <span className="italic text-gradient-gold">12 unidades</span>
+            Girasol <span className="italic text-gradient-gold">6 unidades</span>
           </h2>
         </div>
 
@@ -130,29 +111,27 @@ const Index = () => {
           <div className="space-y-6 order-2">
             {/* Desktop Title */}
             <div className="hidden lg:block space-y-6">
-              <p className="text-xs tracking-[0.4em] uppercase text-primary">Ramo del mes · Agosto</p>
+              <p className="text-xs tracking-[0.4em] uppercase text-primary">Ramo del mes · Septiembre</p>
               <h2 className="font-serif text-5xl md:text-6xl leading-tight">
-                Girasol <span className="italic text-gradient-gold">12 unidades</span>
+                Girasol <span className="italic text-gradient-gold">6 unidades</span>
               </h2>
             </div>
             <div className="w-16 h-px bg-primary hidden lg:block" />
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Doce girasoles frescos con astromelia en tonos cálidos de rosa,
-              envueltos en papel negro con lazo. Una explosión de primavera
-              hecha para alegrar tu día.
+              Seis girasoles frescos con pomas en tonos blancos, envueltos en papel blanco con lazo. Un detalle lleno de luz y alegría para hacer sonreír a alguien especial.
             </p>
-            
+
             <div className="flex items-baseline gap-3">
               <span className="text-xs tracking-[0.3em] uppercase text-muted-foreground">Precio</span>
-              <span className="font-serif text-4xl text-primary">₡ 20 000</span>
+              <span className="font-serif text-4xl text-primary">₡ 10 000</span>
             </div>
             <div className="flex gap-4 pt-4">
               <button
                 onClick={() =>
                   addItem({
-                    id: "ramo-mes-girasol-mayo",
+                    id: "ramo-mes-girasol-sept",
                     name: "Girasol — Ramo del Mes",
-                    price: 25000,
+                    price: 10000,
                     image: ramoMesImg,
                   })
                 }
@@ -177,7 +156,7 @@ const Index = () => {
       <section className="bg-gradient-cream py-24 md:py-32">
         <div className="container">
           <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
-            
+
             <h2 className="font-serif text-5xl md:text-6xl">
               Nuestras <span className="italic text-gradient-gold">colecciones</span>
             </h2>

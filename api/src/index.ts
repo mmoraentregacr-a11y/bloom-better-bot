@@ -99,18 +99,19 @@ app.http("me", { methods: ["GET"], authLevel: "anonymous", route: "me", handler:
   const customer=(await pool.request().input("id",sql.NVarChar,identity.id).input("email",sql.NVarChar,identity.email).input("name",sql.NVarChar,identity.name).input("phone",sql.NVarChar,identity.phone||null).query(`DECLARE @customer nvarchar(128); SELECT TOP(1) @customer=id FROM Customers WHERE email=@email; IF @customer IS NULL SELECT TOP(1) @customer=id FROM Customers WHERE id=@id; IF @customer IS NULL BEGIN SET @customer=@id; INSERT Customers(id,email,name,phone) VALUES(@customer,@email,@name,@phone); END ELSE UPDATE Customers SET email=@email,name=@name,phone=COALESCE(NULLIF(@phone,''),phone) WHERE id=@customer; SELECT @customer id;`)).recordset[0].id;
   const result = await pool.request().input("id", sql.NVarChar, customer).query(`
     SELECT c.name,c.email,c.phone,l.purchase_count,l.cycle_spend,
+      CAST(CASE WHEN EXISTS(SELECT 1 FROM Benefits b WHERE b.customer_id=c.id AND b.kind='discount_10' AND b.redeemed_at IS NULL) THEN 1 ELSE 0 END AS bit) discount_10,
       CAST(CASE WHEN EXISTS(SELECT 1 FROM Benefits b WHERE b.customer_id=c.id AND b.kind='free_shipping' AND b.redeemed_at IS NULL) THEN 1 ELSE 0 END AS bit) free_shipping,
       COALESCE((SELECT SUM(amount) FROM Benefits b WHERE b.customer_id=c.id AND b.kind='credit' AND b.redeemed_at IS NULL),0) credit
     FROM Customers c LEFT JOIN Loyalty l ON l.customer_id=c.id WHERE c.id=@id;
     SELECT id,created_at,total,status,JSON_VALUE(delivery_json,'$.cancellation.reason') cancellation_reason,(SELECT SUM(quantity) FROM OrderItems WHERE order_id=o.id) item_count FROM Orders o WHERE customer_id=@id ORDER BY created_at DESC;`);
   const recordsets = result.recordsets as sql.IRecordSet<Record<string, unknown>>[];
   const profile = recordsets[0][0];
-  return json({ isAdmin:identity.admin, name: profile.name, email: profile.email, phone: profile.phone, loyalty: { completedPurchases: profile.purchase_count || 0, cycleSpend: money(profile.cycle_spend), freeShippingAvailable: profile.free_shipping, creditAvailable: money(profile.credit) }, orders: recordsets[1].map(o => ({ id:o.id, createdAt:o.created_at, total:money(o.total), status:o.status, itemCount:o.item_count, cancellationReason:o.cancellation_reason })) });
+  return json({ isAdmin:identity.admin, name: profile.name, email: profile.email, phone: profile.phone, loyalty: { completedPurchases: profile.purchase_count || 0, cycleSpend: money(profile.cycle_spend), discountAvailable: Boolean(profile.discount_10), freeShippingAvailable: profile.free_shipping, creditAvailable: money(profile.credit) }, orders: recordsets[1].map(o => ({ id:o.id, createdAt:o.created_at, total:money(o.total), status:o.status, itemCount:o.item_count, cancellationReason:o.cancellation_reason })) });
 }) });
 
 app.http("orders", { methods: ["POST"], authLevel: "anonymous", route: "orders", handler: (request) => optionallySecured(request, async identity => {
   type IncomingItem = { id:string; sku?:string; name:string; price?:number; quantity:number; bouquetSize?:"small"|"medium"|"large"; configuration?:Array<{optionId:string;sku:string;name:string;quantity:number}> };
-  const body = await request.json() as { items?: IncomingItem[]; delivery?: Record<string,string>; redeemFreeShipping?:boolean; redeemCredit?:boolean };
+  const body = await request.json() as { items?: IncomingItem[]; delivery?: Record<string,string>; redeemDiscount?:boolean; redeemFreeShipping?:boolean; redeemCredit?:boolean };
   if (!body.items?.length || body.items.some(i => !i.id || !i.name?.trim() || i.name.length>240 || !Number.isInteger(i.quantity) || i.quantity<1 || i.quantity>100)) return json({ message: "El pedido no es válido." }, 400);
   const guestName=String(body.delivery?.nombre||"").trim().slice(0,100);
   const guestEmail=String(body.delivery?.email||"").trim().toLowerCase().slice(0,255);
@@ -161,7 +162,13 @@ app.http("orders", { methods: ["POST"], authLevel: "anonymous", route: "orders",
       }
     }
     const productTotal=money(pricedItems.reduce((sum,item)=>sum+item.unitPrice*Math.floor(item.quantity),0));
-    let freeShippingRedeemed=false; let creditApplied=0;
+    let discountApplied=0; let freeShippingRedeemed=false; let creditApplied=0;
+    if(body.redeemDiscount&&productTotal>0) {
+      const benefit=(await new sql.Request(tx).input("customer",sql.NVarChar,customer).query(`SELECT TOP(1) id FROM Benefits WITH(UPDLOCK,HOLDLOCK) WHERE customer_id=@customer AND kind='discount_10' AND redeemed_at IS NULL ORDER BY created_at,id`)).recordset[0];
+      if(!benefit){await tx.rollback();return json({message:"El descuento del 10% ya no está disponible. Actualiza tu cuenta y vuelve a intentarlo."},409);}
+      await new sql.Request(tx).input("id",sql.UniqueIdentifier,benefit.id).query(`UPDATE Benefits SET redeemed_at=SYSUTCDATETIME() WHERE id=@id`);
+      discountApplied=money(productTotal*.10);
+    }
     if(body.redeemFreeShipping&&baseShippingFee>0) {
       const benefit=(await new sql.Request(tx).input("customer",sql.NVarChar,customer).query(`SELECT TOP(1) id FROM Benefits WITH(UPDLOCK,HOLDLOCK) WHERE customer_id=@customer AND kind='free_shipping' AND redeemed_at IS NULL ORDER BY created_at,id`)).recordset[0];
       if(!benefit){await tx.rollback();return json({message:"El envío gratis ya no está disponible. Actualiza tu cuenta y vuelve a intentarlo."},409);}
@@ -172,7 +179,7 @@ app.http("orders", { methods: ["POST"], authLevel: "anonymous", route: "orders",
       const benefits=(await new sql.Request(tx).input("customer",sql.NVarChar,customer).query(`SELECT id,amount FROM Benefits WITH(UPDLOCK,HOLDLOCK) WHERE customer_id=@customer AND kind='credit' AND redeemed_at IS NULL AND amount>0 ORDER BY created_at,id`)).recordset;
       const available=money(benefits.reduce((sum,benefit)=>sum+Number(benefit.amount),0));
       if(!available){await tx.rollback();return json({message:"El crédito del 10% ya no está disponible. Actualiza tu cuenta y vuelve a intentarlo."},409);}
-      creditApplied=money(Math.min(productTotal,available));
+      creditApplied=money(Math.min(productTotal-discountApplied,available));
       let remaining=creditApplied;
       for(const benefit of benefits){
         if(remaining<=0) break;
@@ -182,16 +189,16 @@ app.http("orders", { methods: ["POST"], authLevel: "anonymous", route: "orders",
       }
     }
     const shippingFee=freeShippingRedeemed?0:baseShippingFee;
-    const total=money(productTotal+shippingFee-creditApplied);
+    const total=money(productTotal-discountApplied+shippingFee-creditApplied);
     const configuredTaxRate=Number(process.env.IVA_RATE||"0.13");
     const taxRate=Number.isFinite(configuredTaxRate)&&configuredTaxRate>=0&&configuredTaxRate<=1?configuredTaxRate:0.13;
     // Catalog prices already include IVA. Extract it for the invoice instead of
     // charging the customer a second time.
-    const subtotal=money((productTotal+shippingFee)/(1+taxRate));
-    const taxAmount=money(productTotal+shippingFee-subtotal);
+    const subtotal=money((productTotal-discountApplied+shippingFee)/(1+taxRate));
+    const taxAmount=money(productTotal-discountApplied+shippingFee-subtotal);
     const orderId = crypto.randomUUID();
     const invoiceNumber=`GB-${new Date().toISOString().slice(0,10).replaceAll("-","")}-${orderId.slice(0,8).toUpperCase()}`; const createdAt=new Date().toISOString();
-    const orderDelivery={...delivery,shippingFee:String(shippingFee),freeShippingRedeemed:freeShippingRedeemed?"Sí":undefined,creditApplied:creditApplied?String(creditApplied):undefined};
+    const orderDelivery={...delivery,shippingFee:String(shippingFee),discountApplied:discountApplied?String(discountApplied):undefined,freeShippingRedeemed:freeShippingRedeemed?"Sí":undefined,creditApplied:creditApplied?String(creditApplied):undefined};
     await new sql.Request(tx).input("id",sql.UniqueIdentifier,orderId).input("customer",sql.NVarChar,customer).input("invoice",sql.VarChar,invoiceNumber).input("subtotal",sql.Decimal(12,2),subtotal).input("taxRate",sql.Decimal(6,5),taxRate).input("taxAmount",sql.Decimal(12,2),taxAmount).input("total",sql.Decimal(12,2),total).input("delivery",sql.NVarChar,JSON.stringify(orderDelivery)).query(`INSERT Orders(id,customer_id,invoice_number,subtotal,tax_rate,tax_amount,total,status,delivery_json) VALUES(@id,@customer,@invoice,@subtotal,@taxRate,@taxAmount,@total,'pending',@delivery)`);
     for (const item of pricedItems) {
       const inserted=await new sql.Request(tx).input("order",sql.UniqueIdentifier,orderId).input("product",sql.NVarChar,item.id).input("sku",sql.VarChar,item.sku).input("name",sql.NVarChar,item.displayName).input("price",sql.Decimal(12,2),item.unitPrice).input("qty",sql.Int,Math.floor(item.quantity)).input("config",sql.NVarChar,item.resolved?JSON.stringify(item.resolved):null).query(`INSERT OrderItems(order_id,product_id,sku,name,unit_price,quantity,configuration_json) OUTPUT INSERTED.id VALUES(@order,@product,@sku,@name,@price,@qty,@config)`);
@@ -200,8 +207,8 @@ app.http("orders", { methods: ["POST"], authLevel: "anonymous", route: "orders",
     await tx.commit();
     const invoiceItems=pricedItems.map(item=>({sku:item.sku!,name:item.displayName,quantity:Math.floor(item.quantity),unitPrice:item.unitPrice,lineSubtotal:money(item.unitPrice*Math.floor(item.quantity)),configuration:item.resolved}));
     const notificationCustomer={name:identity?.name||guestName,email:identity?.email||guestEmail};
-    let notificationSent=false; let customerNotificationSent=false; try{const sent=await notifyAdmins({invoiceNumber,createdAt,customer:notificationCustomer,delivery,items:invoiceItems,productTotal,shippingFee,creditApplied,freeShippingRedeemed,subtotal,taxRate,taxAmount,total});notificationSent=sent.adminSent;customerNotificationSent=sent.customerSent;}catch(error){console.error("No se pudo enviar el correo del pedido",error);}
-    return json({id:orderId,invoiceNumber,createdAt,currency:"CRC",items:invoiceItems,delivery,productTotal,shippingFee,creditApplied,freeShippingRedeemed,subtotal,taxRate,taxAmount,total,notificationSent,customerNotificationSent,loyaltyEligible:Boolean(identity)},201);
+    let notificationSent=false; let customerNotificationSent=false; try{const sent=await notifyAdmins({invoiceNumber,createdAt,customer:notificationCustomer,delivery,items:invoiceItems,productTotal,discountApplied,shippingFee,creditApplied,freeShippingRedeemed,subtotal,taxRate,taxAmount,total});notificationSent=sent.adminSent;customerNotificationSent=sent.customerSent;}catch(error){console.error("No se pudo enviar el correo del pedido",error);}
+    return json({id:orderId,invoiceNumber,createdAt,currency:"CRC",items:invoiceItems,delivery,productTotal,discountApplied,shippingFee,creditApplied,freeShippingRedeemed,subtotal,taxRate,taxAmount,total,notificationSent,customerNotificationSent,loyaltyEligible:Boolean(identity)},201);
   } catch(error) { await tx.rollback(); throw error; }
 }) });
 
@@ -239,9 +246,11 @@ app.http("cancelDashboardOrder", { methods:["POST"], authLevel:"anonymous", rout
     if(order.status!=="pending"){await tx.rollback();return json({message:"Solo se pueden cancelar pedidos pendientes."},409);}
     const delivery=JSON.parse(String(order.delivery_json||"{}"));
     const freeShippingRestored=delivery.freeShippingRedeemed==="Sí";
+    const discountRestored=Number(delivery.discountApplied||0)>0;
     const creditRestored=Number(delivery.creditApplied||0);
     if(!String(order.customer_id).startsWith("guest:")){
       if(freeShippingRestored) await new sql.Request(tx).input("customer",sql.NVarChar,order.customer_id).input("order",sql.UniqueIdentifier,id).query(`INSERT Benefits(customer_id,source_order_id,kind,amount) VALUES(@customer,@order,'free_shipping',0)`);
+      if(discountRestored) await new sql.Request(tx).input("customer",sql.NVarChar,order.customer_id).input("order",sql.UniqueIdentifier,id).query(`INSERT Benefits(customer_id,source_order_id,kind,amount) VALUES(@customer,@order,'discount_10',0)`);
       if(Number.isFinite(creditRestored)&&creditRestored>0) await new sql.Request(tx).input("customer",sql.NVarChar,order.customer_id).input("order",sql.UniqueIdentifier,id).input("amount",sql.Decimal(12,2),creditRestored).query(`INSERT Benefits(customer_id,source_order_id,kind,amount) VALUES(@customer,@order,'credit',@amount)`);
     }
     delivery.cancellation={reason,by:identity.email,at:new Date().toISOString()};
@@ -328,7 +337,8 @@ app.http("confirmDashboardOrder", { methods:["POST"], authLevel:"anonymous", rou
     const spend=money(startingSpend+productSpend);
     await new sql.Request(tx).input("id",sql.UniqueIdentifier,id).query(`UPDATE Orders SET status='paid',paid_at=SYSUTCDATETIME() WHERE id=@id`);
     await new sql.Request(tx).input("customer",sql.NVarChar,order.customer_id).input("count",sql.Int,count).input("spend",sql.Decimal(12,2),spend).query(`UPDATE Loyalty SET purchase_count=@count,cycle_spend=@spend,updated_at=SYSUTCDATETIME() WHERE customer_id=@customer`);
-    if(count===5) await new sql.Request(tx).input("customer",sql.NVarChar,order.customer_id).input("order",sql.UniqueIdentifier,id).query(`INSERT Benefits(customer_id,source_order_id,kind,amount) VALUES(@customer,@order,'free_shipping',0)`);
+    if(count===5) await new sql.Request(tx).input("customer",sql.NVarChar,order.customer_id).input("order",sql.UniqueIdentifier,id).query(`INSERT Benefits(customer_id,source_order_id,kind,amount) VALUES(@customer,@order,'discount_10',0)`);
+    if(count===8) await new sql.Request(tx).input("customer",sql.NVarChar,order.customer_id).input("order",sql.UniqueIdentifier,id).query(`INSERT Benefits(customer_id,source_order_id,kind,amount) VALUES(@customer,@order,'free_shipping',0)`);
     if(count===10) await new sql.Request(tx).input("customer",sql.NVarChar,order.customer_id).input("order",sql.UniqueIdentifier,id).input("amount",sql.Decimal(12,2),money(spend*.10)).query(`INSERT Benefits(customer_id,source_order_id,kind,amount) VALUES(@customer,@order,'credit',@amount)`);
     await tx.commit(); return json({ok:true,purchaseCount:count});
   } catch(error) { await tx.rollback(); throw error; }
