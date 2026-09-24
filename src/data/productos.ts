@@ -631,6 +631,21 @@ export const productos: Producto[] = [
   { "id":"globo-amor-4", "name":"Globo de Amor 4", "price":1500, "image":"/productos/globos/love4.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para expresar amor." },
   { "id":"globo-amor-5", "name":"Globo de Amor 5", "price":1500, "image":"/productos/globos/love5.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para expresar amor." },
   { "id":"globo-amor-6", "name":"Globo de Amor 6", "price":1500, "image":"/productos/globos/love6.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para expresar amor." },
+  { "id":"globo-sb-1", "name":"Globo Estrella Rosa Claro", "price":1500, "image":"/productos/globos/sb1.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color rosa claro." },
+  { "id":"globo-sb-2", "name":"Globo Estrella Fucsia", "price":1500, "image":"/productos/globos/sb2.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color fucsia." },
+  { "id":"globo-sb-3", "name":"Globo Estrella Fucsia Holográfica", "price":1500, "image":"/productos/globos/sb3.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella fucsia con acabado holográfico." },
+  { "id":"globo-sg-1", "name":"Globo Estrella Oro Rosa", "price":1500, "image":"/productos/globos/sg1.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color oro rosa." },
+  { "id":"globo-sg-2", "name":"Globo Estrella Morada", "price":1500, "image":"/productos/globos/sg2.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color morado." },
+  { "id":"globo-sg-3", "name":"Globo Estrella Morada Holográfica", "price":1500, "image":"/productos/globos/sg3.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella morada con acabado holográfico." },
+  { "id":"globo-sp-1", "name":"Globo Estrella Champán", "price":1500, "image":"/productos/globos/sp1.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color champán." },
+  { "id":"globo-sp-2", "name":"Globo Estrella Plateada", "price":1500, "image":"/productos/globos/sp2.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color plateado." },
+  { "id":"globo-sp-3", "name":"Globo Estrella Dorada Holográfica", "price":1500, "image":"/productos/globos/sp3.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella dorada con acabado holográfico." },
+  { "id":"globo-sp-4", "name":"Globo Estrella Dorada", "price":1500, "image":"/productos/globos/sp4.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color dorado." },
+  { "id":"globo-sp-5", "name":"Globo Estrella Roja", "price":1500, "image":"/productos/globos/sp5.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color rojo." },
+  { "id":"globo-sp-6", "name":"Globo Estrella Turquesa", "price":1500, "image":"/productos/globos/sp6.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color turquesa." },
+  { "id":"globo-sp-7", "name":"Globo Estrella Azul", "price":1500, "image":"/productos/globos/sp7.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color azul." },
+  { "id":"globo-sr-1", "name":"Globo Estrella Verde", "price":1500, "image":"/productos/globos/sr1.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color verde." },
+  { "id":"globo-ss-1", "name":"Globo Estrella Negra", "price":1500, "image":"/productos/globos/ss1.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color negro." },
   /*FINAL GLOBOS*/
   
   
