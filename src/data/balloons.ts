@@ -3,6 +3,7 @@ export const balloons = [
   ...Array.from({ length: 5 }, (_, index) => ({ code: `GRAD-${index + 1}`, label: `Graduación ${index + 1}`, image: `/productos/globos/grad${index + 1}.jpg` })),
   ...Array.from({ length: 6 }, (_, index) => ({ code: `CUMPLE-${index + 1}`, label: `Feliz Cumpleaños ${index + 1}`, image: `/productos/globos/hb${index + 1}.jpg` })),
   ...Array.from({ length: 6 }, (_, index) => ({ code: `AMOR-${index + 1}`, label: `Amor ${index + 1}`, image: `/productos/globos/love${index + 1}.jpg` })),
+  
   { code: "SB-1", label: "Estrella Rosa Claro", image: "/productos/globos/sb1.jpg" },
   { code: "SB-2", label: "Estrella Fucsia", image: "/productos/globos/sb2.jpg" },
   { code: "SB-3", label: "Estrella Fucsia Holográfica", image: "/productos/globos/sb3.jpg" },
