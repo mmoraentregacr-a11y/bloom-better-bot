@@ -8,7 +8,7 @@ import pequenosImg from "@/assets/collection-pequenos.jpg";
 import bodaImg from "@/assets/collection-boda.jpg";
 import regalosImg from "@/assets/collection-regalos.jpg";
 // import perfumesImg from "@/assets/collection-perfumes.jpg"; // Colección de perfumes oculta temporalmente.
-import ramoMesImg from "@/assets/ramo-mes1.jpeg";
+import ramoMesImg from "@/assets/ramo-mes1.png";
 
 const collections = [
   { to: "/grandes", label: "Ramos Grandes", img: grandesImg, desc: "Para los gestos inolvidables" },
