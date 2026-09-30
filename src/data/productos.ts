@@ -9,7 +9,6 @@ export type SubCategoria =
   | "Globos"
   | "Hombres" 
   | "Mujeres";
-
 export interface Producto {
   id: string;
   name: string;
@@ -32,9 +31,9 @@ export const productos: Producto[] = [
     "price": 24000,
     "hasCarousel": true,
     "images": [
-      "/productos/cajas/boxRed1.mp4",
+      "https://grupoentregafotos.blob.core.windows.net/productos/cajas/boxRed1.mp4",
     ],
-    "image": "/productos/cajas/boxRed1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/cajas/boxRed1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Cajas y Jarrones",
     "description": "Hermoso detalle para regalar."
@@ -45,10 +44,10 @@ export const productos: Producto[] = [
     "price": 35000,
     "hasCarousel": true,
     "images": [
-      "/productos/cajas/centroBig2.jpeg",
-      "/productos/cajas/centroBig1.mp4",
+      "https://grupoentregafotos.blob.core.windows.net/productos/cajas/centroBig2.jpeg",
+      "https://grupoentregafotos.blob.core.windows.net/productos/cajas/centroBig1.mp4",
     ],
-    "image": "/productos/cajas/centroBig1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/cajas/centroBig1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Cajas y Jarrones",
     "description": "Hermoso detalle para regalar."
@@ -59,10 +58,10 @@ export const productos: Producto[] = [
     "price": 10000,
     "hasCarousel": true,
     "images": [
-      "/productos/cajas/centroPeq2.jpeg",
-      "/productos/cajas/centroPeq1.mp4",
+      "https://grupoentregafotos.blob.core.windows.net/productos/cajas/centroPeq2.jpeg",
+      "https://grupoentregafotos.blob.core.windows.net/productos/cajas/centroPeq1.mp4",
     ],
-    "image": "/productos/cajas/centroPeq1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/cajas/centroPeq1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Cajas y Jarrones",
     "description": "Hermoso detalle para regalar."
@@ -71,7 +70,7 @@ export const productos: Producto[] = [
     "id": "prod-233",
     "name": "Centro de mesa Primaveral Combo",
     "price": 50000,
-    "image": "/productos/cajas/centroMesaCompleto1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/cajas/centroMesaCompleto1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Cajas y Jarrones",
     "description": "Hermoso detalle para regalar."
@@ -82,9 +81,9 @@ export const productos: Producto[] = [
     "price": 12000,
     "hasCarousel": true,
     "images": [
-      "/productos/cajas/centroPeq4.jpeg",
+      "https://grupoentregafotos.blob.core.windows.net/productos/cajas/centroPeq4.jpeg",
     ],
-    "image": "/productos/cajas/centroPeq3.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/cajas/centroPeq3.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Cajas y Jarrones",
     "description": "Hermoso detalle para regalar."
@@ -93,7 +92,7 @@ export const productos: Producto[] = [
     "id": "prod-293",
     "name": "Globo con dulces Grande",
     "price": 15000,
-    "image": "/productos/cajas/globoDulces1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/cajas/globoDulces1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Cajas y Jarrones",
     "description": "Hermoso detalle para regalar."
@@ -104,9 +103,9 @@ export const productos: Producto[] = [
     "price": 22500,
     "hasCarousel": true,
     "images": [
-      "/productos/cajas/cajaBigChoco1.mp4",
+      "https://grupoentregafotos.blob.core.windows.net/productos/cajas/cajaBigChoco1.mp4",
     ],
-    "image": "/productos/cajas/cajaBigChoco1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/cajas/cajaBigChoco1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Cajas y Jarrones",
     "description": "Hermoso detalle para regalar."
@@ -116,7 +115,7 @@ export const productos: Producto[] = [
     "name": "Caja de dulces mediana",
     "price": 16500,
     "hasCarousel": true,
-    "image": "/productos/cajas/cajaMedChoco1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/cajas/cajaMedChoco1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Cajas y Jarrones",
     "description": "Hermoso detalle para regalar."
@@ -126,7 +125,7 @@ export const productos: Producto[] = [
     "name": "Caja de dulces pequeña",
     "price": 16500,
     "hasCarousel": true,
-    "image": "/productos/cajas/cajaMedChoco2.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/cajas/cajaMedChoco2.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Cajas y Jarrones",
     "description": "Hermoso detalle para regalar."
@@ -136,7 +135,7 @@ export const productos: Producto[] = [
     "name": "Caja de dulces pequeña",
     "price": 12500,
     "hasCarousel": true,
-    "image": "/productos/cajas/cajaMedChoco3.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/cajas/cajaMedChoco3.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Cajas y Jarrones",
     "description": "Hermoso detalle para regalar."
@@ -146,7 +145,7 @@ export const productos: Producto[] = [
     "name": "Caja grande decorada + globo con helio + 5 chocolates grandes premium *No se inlcuye precio de peluche ya que varia según elección.",
     "price": 19000,
     "hasCarousel": true,
-    "image": "/productos/cajas/cajaPeluche1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/cajas/cajaPeluche1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Cajas y Jarrones",
     "description": "Hermoso detalle para regalar."
@@ -156,7 +155,7 @@ export const productos: Producto[] = [
     "name": "Caja grande decorada + globo con helio + 4 chocolates grandes premium + tarjeta personalizada *No se inlcuye precio de peluche ya que varia según elección.",
     "price": 16500,
     "hasCarousel": true,
-    "image": "/productos/cajas/cajaPeluche2.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/cajas/cajaPeluche2.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Cajas y Jarrones",
     "description": "Hermoso detalle para regalar."
@@ -167,9 +166,9 @@ export const productos: Producto[] = [
     "price": 7500,
     "hasCarousel": true,
     "images": [
-      "/productos/cajas/jar1Gerbera2.jpeg",
+      "https://grupoentregafotos.blob.core.windows.net/productos/cajas/jar1Gerbera2.jpeg",
     ],
-    "image": "/productos/cajas/jar1Gerbera1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/cajas/jar1Gerbera1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Cajas y Jarrones",
     "description": "Hermoso detalle para regalar."
@@ -182,7 +181,7 @@ export const productos: Producto[] = [
     "id": "prod-5",
     "name": "Caja Ferrero Rocher 12 und",
     "price": 6900,
-    "image": "/productos/dulces/CajaFerreroRocher150g.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/CajaFerreroRocher150g.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -191,7 +190,7 @@ export const productos: Producto[] = [
     "id": "prod-11",
     "name": "Ferrero Rocher 8 und",
     "price": 5500,
-    "image": "/productos/dulces/ferreroRocher8u.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/ferreroRocher8u.png",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -200,7 +199,7 @@ export const productos: Producto[] = [
     "id": "prod-10",
     "name": "Ferrero Rocher 4 und",
     "price": 3500,
-    "image": "/productos/dulces/ferreroRocher4u.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/ferreroRocher4u.png",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -209,7 +208,7 @@ export const productos: Producto[] = [
     "id": "prod-9",
     "name": "Ferrero Rocher 3 und",
     "price": 2500,
-    "image": "/productos/dulces/ferreroRocher3u.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/ferreroRocher3u.png",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -218,7 +217,7 @@ export const productos: Producto[] = [
     "id": "prod-6",
     "name": "Caja Chocolate Vizzio 120g",
     "price": 3500,
-    "image": "/productos/dulces/cajaVizzio.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/cajaVizzio.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -227,7 +226,7 @@ export const productos: Producto[] = [
     "id": "prod-18",
     "name": "Hershey’s Giant Cokies & Cream",
     "price": 3500,
-    "image": "/productos/dulces/hersheysCnC184g.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/hersheysCnC184g.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -236,7 +235,7 @@ export const productos: Producto[] = [
     "id": "prod-17",
     "name": "Hershey’s Giant Almendras",
     "price": 3500,
-    "image": "/productos/dulces/hersheysAlmendra192g.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/hersheysAlmendra192g.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -245,7 +244,7 @@ export const productos: Producto[] = [
     "id": "prod-16",
     "name": "Hershey’s Giant",
     "price": 3500,
-    "image": "/productos/dulces/hersheys198g.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/hersheys198g.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -254,7 +253,7 @@ export const productos: Producto[] = [
     "id": "prod-20",
     "name": "M&M’s Maní 92g",
     "price": 1900,
-    "image": "/productos/dulces/m&msAmarillo92g.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/m&msAmarillo92g.png",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -263,7 +262,7 @@ export const productos: Producto[] = [
     "id": "prod-22",
     "name": "M&M’s Original 92g",
     "price": 1900,
-    "image": "/productos/dulces/m&msCafe92g.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/m&msCafe92g.png",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -272,7 +271,7 @@ export const productos: Producto[] = [
     "id": "prod-39",
     "name": "Snickers Original",
     "price": 1300,
-    "image": "/productos/dulces/snickers.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/snickers.png",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -281,7 +280,7 @@ export const productos: Producto[] = [
     "id": "prod-42",
     "name": "Snickers con Maní",
     "price": 1000,
-    "image": "/productos/dulces/snickersMani.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/snickersMani.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -290,7 +289,7 @@ export const productos: Producto[] = [
     "id": "prod-40",
     "name": "Snickers con Almendra",
     "price": 1300,
-    "image": "/productos/dulces/snickersAlmond.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/snickersAlmond.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -299,7 +298,7 @@ export const productos: Producto[] = [
     "id": "prod-41",
     "name": "Snickers Chocolate Blanco",
     "price": 1300,
-    "image": "/productos/dulces/snickersBlanco.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/snickersBlanco.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -308,7 +307,7 @@ export const productos: Producto[] = [
     "id": "prod-43",
     "name": "Snickers Pequeño Unidad",
     "price": 200,
-    "image": "/productos/dulces/snickersPeq.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/snickersPeq.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -317,7 +316,7 @@ export const productos: Producto[] = [
     "id": "prod-44",
     "name": "Chocolate Tutto con Arandano",
     "price": 1600,
-    "image": "/productos/dulces/tuttoArandano.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/tuttoArandano.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -326,7 +325,7 @@ export const productos: Producto[] = [
     "id": "prod-46",
     "name": "Chocolate Tutto con Crocante Belga",
     "price": 3000,
-    "image": "/productos/dulces/tuttoCrocante.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/tuttoCrocante.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -335,7 +334,7 @@ export const productos: Producto[] = [
     "id": "prod-45",
     "name": "Chocolate Blanco Tutto Mix Nueces",
     "price": 1600,
-    "image": "/productos/dulces/tuttoBlanco.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/tuttoBlanco.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -344,7 +343,7 @@ export const productos: Producto[] = [
     "id": "prod-47",
     "name": "Chocolate Tutto Mix Nueces",
     "price": 1600,
-    "image": "/productos/dulces/tuttoMix.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/tuttoMix.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -353,7 +352,7 @@ export const productos: Producto[] = [
     "id": "prod-48",
     "name": "Chocolate Tutto Sin Azúcar",
     "price": 1500,
-    "image": "/productos/dulces/tuttoSinAzucar.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/tuttoSinAzucar.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -362,7 +361,7 @@ export const productos: Producto[] = [
     "id": "prod-32",
     "name": "Chocolate Milka Leche",
     "price": 3200,
-    "image": "/productos/dulces/milkaLeche.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/milkaLeche.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -371,7 +370,7 @@ export const productos: Producto[] = [
     "id": "prod-31",
     "name": "Chocolate Blanco Milka",
     "price": 1200,
-    "image": "/productos/dulces/milkaBlanco.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/milkaBlanco.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -380,7 +379,7 @@ export const productos: Producto[] = [
     "id": "prod-30",
     "name": "Chocolate Milka Arroz Inflado",
     "price": 1500,
-    "image": "/productos/dulces/milkaArroz.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/milkaArroz.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -389,7 +388,7 @@ export const productos: Producto[] = [
     "id": "prod-33",
     "name": "Milka Oreo",
     "price": 15000,
-    "image": "/productos/dulces/milkaOreo.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/milkaOreo.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -398,7 +397,7 @@ export const productos: Producto[] = [
     "id": "prod-34",
     "name": "Chocolate MilkyWay",
     "price": 1200,
-    "image": "/productos/dulces/milkyWay.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/milkyWay.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -407,7 +406,7 @@ export const productos: Producto[] = [
     "id": "prod-7",
     "name": "Chocolate Choys Arroz Inflado",
     "price": 600,
-    "image": "/productos/dulces/choysArroz.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/choysArroz.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -416,7 +415,7 @@ export const productos: Producto[] = [
     "id": "prod-8",
     "name": "Chocolate Choys Mani",
     "price": 600,
-    "image": "/productos/dulces/choysMani.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/choysMani.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -425,7 +424,7 @@ export const productos: Producto[] = [
     "id": "prod-19",
     "name": "Hersheys Cn C43g",
     "price": 15000,
-    "image": "/productos/dulces/hersheysCnC43g.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/hersheysCnC43g.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -435,7 +434,7 @@ export const productos: Producto[] = [
     "id": "prod-21",
     "name": "M&ms Cafe",
     "price": 15000,
-    "image": "/productos/dulces/m&msCafe.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/m&msCafe.png",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -446,7 +445,7 @@ export const productos: Producto[] = [
     "id": "prod-37",
     "name": "Skittles Original",
     "price": 1300,
-    "image": "/productos/dulces/skittlesOriginal.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/skittlesOriginal.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -455,7 +454,7 @@ export const productos: Producto[] = [
     "id": "prod-38",
     "name": "Skittles Wild Berry",
     "price": 1300,
-    "image": "/productos/dulces/skittlesWild.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/skittlesWild.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -464,7 +463,7 @@ export const productos: Producto[] = [
     "id": "prod-36",
     "name": "Gomitas Perlitas",
     "price": 800,
-    "image": "/productos/dulces/perlitas.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/perlitas.png",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -473,7 +472,7 @@ export const productos: Producto[] = [
     "id": "prod-14",
     "name": "Gomitas Gusanos",
     "price": 850,
-    "image": "/productos/dulces/gusanos.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/gusanos.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -482,7 +481,7 @@ export const productos: Producto[] = [
     "id": "prod-15",
     "name": "Gomitas Gusanos Acidos",
     "price": 850,
-    "image": "/productos/dulces/gusanosAcidos.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/gusanosAcidos.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -491,7 +490,7 @@ export const productos: Producto[] = [
     "id": "prod-13",
     "name": "Gomita Fresitas",
     "price": 850,
-    "image": "/productos/dulces/gomitaFresa.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/gomitaFresa.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -500,7 +499,7 @@ export const productos: Producto[] = [
     "id": "prod-12",
     "name": "Gomitas Aros",
     "price": 850,
-    "image": "/productos/dulces/gomitaAro.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/gomitaAro.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -511,7 +510,7 @@ export const productos: Producto[] = [
     "id": "prod-23",
     "name": "Maní con Chocolate",
     "price": 1900,
-    "image": "/productos/dulces/maniChocolate.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/maniChocolate.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -520,7 +519,7 @@ export const productos: Producto[] = [
     "id": "prod-35",
     "name": "Pasas Chocolate",
     "price": 2000,
-    "image": "/productos/dulces/pasasChocolate.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/pasasChocolate.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -529,7 +528,7 @@ export const productos: Producto[] = [
     "id": "prod-26",
     "name": "Maní Limón y Sal",
     "price": 1000,
-    "image": "/productos/dulces/maniLimonSal.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/maniLimonSal.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -538,7 +537,7 @@ export const productos: Producto[] = [
     "id": "prod-24",
     "name": "Maní Garapinado",
     "price": 1000,
-    "image": "/productos/dulces/maniGarapinado.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/maniGarapinado.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -547,7 +546,7 @@ export const productos: Producto[] = [
     "id": "prod-25",
     "name": "Maní Japonés",
     "price": 1000,
-    "image": "/productos/dulces/maniJapones.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/maniJapones.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -556,7 +555,7 @@ export const productos: Producto[] = [
     "id": "prod-28",
     "name": "Maní Salado",
     "price": 1000,
-    "image": "/productos/dulces/maniSalado.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/maniSalado.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -565,7 +564,7 @@ export const productos: Producto[] = [
     "id": "prod-27",
     "name": "Maní Pasas",
     "price": 1000,
-    "image": "/productos/dulces/maniPasas.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/maniPasas.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -575,7 +574,7 @@ export const productos: Producto[] = [
     "id": "prod-29",
     "name": "Semillas Mixtas",
     "price": 1500,
-    "image": "/productos/dulces/maniSemillas.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/dulces/maniSemillas.jpg",
     "categoria": "Regalos",
     "subcategoria": "Dulces",
     "description": "Hermoso detalle para regalar."
@@ -586,7 +585,7 @@ export const productos: Producto[] = [
     "id": "prod-53",
     "name": "Snoopy",
     "price": 4500,
-    "image": "/productos/peluches/snoopy.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/peluches/snoopy.png",
     "categoria": "Regalos",
     "subcategoria": "Peluches",
     "description": "Hermoso detalle para regalar."
@@ -595,7 +594,7 @@ export const productos: Producto[] = [
     "id": "prod-52",
     "name": "Chimuelo",
     "price": 10000,
-    "image": "/productos/peluches/Chimuelo.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/peluches/Chimuelo.jpeg",
     "categoria": "Regalos",
     "subcategoria": "Peluches",
     "description": "Hermoso detalle para regalar."
@@ -604,7 +603,7 @@ export const productos: Producto[] = [
     "id": "prod-49",
     "name": "Amor1",
     "price": 5000,
-    "image": "/productos/peluches/amor1.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/peluches/amor1.png",
     "categoria": "Regalos",
     "subcategoria": "Peluches",
     "description": "Hermoso detalle para regalar."
@@ -613,7 +612,7 @@ export const productos: Producto[] = [
     "id": "prod-50",
     "name": "Amor2",
     "price": 5000,
-    "image": "/productos/peluches/amor2.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/peluches/amor2.png",
     "categoria": "Regalos",
     "subcategoria": "Peluches",
     "description": "Hermoso detalle para regalar."
@@ -622,7 +621,7 @@ export const productos: Producto[] = [
     "id": "prod-54",
     "name": "Stitch",
     "price": 8000,
-    "image": "/productos/peluches/stitch.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/peluches/stitch.jpg",
     "categoria": "Regalos",
     "subcategoria": "Peluches",
     "description": "Hermoso detalle para regalar."
@@ -631,50 +630,50 @@ export const productos: Producto[] = [
     "id": "prod-51",
     "name": "Angel",
     "price": 5000,
-    "image": "/productos/peluches/angel.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/peluches/angel.jpg",
     "categoria": "Regalos",
     "subcategoria": "Peluches",
     "description": "Hermoso detalle para regalar."
   },
   /*FINAL PELUCHES*/
   /*INICIO GLOBOS*/
-  { "id":"globo-dia-madre-1", "name":"Globo Feliz Día Mamá 1", "price":1500, "image":"/productos/globos/15Agosto1.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para celebrar a mamá." },
-  { "id":"globo-dia-madre-2", "name":"Globo Feliz Día Mamá 2", "price":1500, "image":"/productos/globos/15Agosto2.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para celebrar a mamá." },
-  { "id":"globo-dia-madre-3", "name":"Globo Feliz Día Mamá 3", "price":1500, "image":"/productos/globos/15Agosto3.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para celebrar a mamá." },
-  { "id":"globo-dia-madre-4", "name":"Globo Feliz Día Mamá 4", "price":1500, "image":"/productos/globos/15Agosto4.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para celebrar a mamá." },
-  { "id":"globo-dia-madre-5", "name":"Globo Feliz Día Mamá 5", "price":1500, "image":"/productos/globos/15Agosto5.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para celebrar a mamá." },
-  { "id":"globo-graduacion-1", "name":"Globo de Graduación 1", "price":1500, "image":"/productos/globos/grad1.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para celebrar una graduación." },
-  { "id":"globo-graduacion-2", "name":"Globo de Graduación 2", "price":1500, "image":"/productos/globos/grad2.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para celebrar una graduación." },
-  { "id":"globo-graduacion-3", "name":"Globo de Graduación 3", "price":1500, "image":"/productos/globos/grad3.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para celebrar una graduación." },
-  { "id":"globo-graduacion-4", "name":"Globo de Graduación 4", "price":1500, "image":"/productos/globos/grad4.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para celebrar una graduación." },
-  { "id":"globo-graduacion-5", "name":"Globo de Graduación 5", "price":1500, "image":"/productos/globos/grad5.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para celebrar una graduación." },
-  { "id":"globo-cumpleanos-1", "name":"Globo Feliz Cumpleaños 1", "price":1500, "image":"/productos/globos/hb1.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para cumpleaños." },
-  { "id":"globo-cumpleanos-2", "name":"Globo Feliz Cumpleaños 2", "price":1500, "image":"/productos/globos/hb2.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para cumpleaños." },
-  { "id":"globo-cumpleanos-3", "name":"Globo Feliz Cumpleaños 3", "price":1500, "image":"/productos/globos/hb3.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para cumpleaños." },
-  { "id":"globo-cumpleanos-4", "name":"Globo Feliz Cumpleaños 4", "price":1500, "image":"/productos/globos/hb4.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para cumpleaños." },
-  { "id":"globo-cumpleanos-5", "name":"Globo Feliz Cumpleaños 5", "price":1500, "image":"/productos/globos/hb5.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para cumpleaños." },
-  { "id":"globo-cumpleanos-6", "name":"Globo Feliz Cumpleaños 6", "price":1500, "image":"/productos/globos/hb6.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para cumpleaños." },
-  { "id":"globo-amor-1", "name":"Globo de Amor 1", "price":1500, "image":"/productos/globos/love1.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para expresar amor." },
-  { "id":"globo-amor-2", "name":"Globo de Amor 2", "price":1500, "image":"/productos/globos/love2.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para expresar amor." },
-  { "id":"globo-amor-3", "name":"Globo de Amor 3", "price":1500, "image":"/productos/globos/love3.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para expresar amor." },
-  { "id":"globo-amor-4", "name":"Globo de Amor 4", "price":1500, "image":"/productos/globos/love4.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para expresar amor." },
-  { "id":"globo-amor-5", "name":"Globo de Amor 5", "price":1500, "image":"/productos/globos/love5.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para expresar amor." },
-  { "id":"globo-amor-6", "name":"Globo de Amor 6", "price":1500, "image":"/productos/globos/love6.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para expresar amor." },
-  { "id":"globo-sb-1", "name":"Globo Estrella Rosa Claro", "price":1500, "image":"/productos/globos/sb1.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color rosa claro." },
-  { "id":"globo-sb-2", "name":"Globo Estrella Fucsia", "price":1500, "image":"/productos/globos/sb2.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color fucsia." },
-  { "id":"globo-sb-3", "name":"Globo Estrella Fucsia Holográfica", "price":1500, "image":"/productos/globos/sb3.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella fucsia con acabado holográfico." },
-  { "id":"globo-sg-1", "name":"Globo Estrella Oro Rosa", "price":1500, "image":"/productos/globos/sg1.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color oro rosa." },
-  { "id":"globo-sg-2", "name":"Globo Estrella Morada", "price":1500, "image":"/productos/globos/sg2.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color morado." },
-  { "id":"globo-sg-3", "name":"Globo Estrella Morada Holográfica", "price":1500, "image":"/productos/globos/sg3.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella morada con acabado holográfico." },
-  { "id":"globo-sp-1", "name":"Globo Estrella Champán", "price":1500, "image":"/productos/globos/sp1.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color champán." },
-  { "id":"globo-sp-2", "name":"Globo Estrella Plateada", "price":1500, "image":"/productos/globos/sp2.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color plateado." },
-  { "id":"globo-sp-3", "name":"Globo Estrella Dorada Holográfica", "price":1500, "image":"/productos/globos/sp3.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella dorada con acabado holográfico." },
-  { "id":"globo-sp-4", "name":"Globo Estrella Dorada", "price":1500, "image":"/productos/globos/sp4.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color dorado." },
-  { "id":"globo-sp-5", "name":"Globo Estrella Roja", "price":1500, "image":"/productos/globos/sp5.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color rojo." },
-  { "id":"globo-sp-6", "name":"Globo Estrella Turquesa", "price":1500, "image":"/productos/globos/sp6.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color turquesa." },
-  { "id":"globo-sp-7", "name":"Globo Estrella Azul", "price":1500, "image":"/productos/globos/sp7.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color azul." },
-  { "id":"globo-sr-1", "name":"Globo Estrella Verde", "price":1500, "image":"/productos/globos/sr1.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color verde." },
-  { "id":"globo-ss-1", "name":"Globo Estrella Negra", "price":1500, "image":"/productos/globos/ss1.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color negro." },
+  { "id":"globo-dia-madre-1", "name":"Globo Feliz Día Mamá 1", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/15Agosto1.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para celebrar a mamá." },
+  { "id":"globo-dia-madre-2", "name":"Globo Feliz Día Mamá 2", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/15Agosto2.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para celebrar a mamá." },
+  { "id":"globo-dia-madre-3", "name":"Globo Feliz Día Mamá 3", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/15Agosto3.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para celebrar a mamá." },
+  { "id":"globo-dia-madre-4", "name":"Globo Feliz Día Mamá 4", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/15Agosto4.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para celebrar a mamá." },
+  { "id":"globo-dia-madre-5", "name":"Globo Feliz Día Mamá 5", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/15Agosto5.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para celebrar a mamá." },
+  { "id":"globo-graduacion-1", "name":"Globo de Graduación 1", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/grad1.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para celebrar una graduación." },
+  { "id":"globo-graduacion-2", "name":"Globo de Graduación 2", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/grad2.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para celebrar una graduación." },
+  { "id":"globo-graduacion-3", "name":"Globo de Graduación 3", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/grad3.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para celebrar una graduación." },
+  { "id":"globo-graduacion-4", "name":"Globo de Graduación 4", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/grad4.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para celebrar una graduación." },
+  { "id":"globo-graduacion-5", "name":"Globo de Graduación 5", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/grad5.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para celebrar una graduación." },
+  { "id":"globo-cumpleanos-1", "name":"Globo Feliz Cumpleaños 1", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/hb1.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para cumpleaños." },
+  { "id":"globo-cumpleanos-2", "name":"Globo Feliz Cumpleaños 2", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/hb2.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para cumpleaños." },
+  { "id":"globo-cumpleanos-3", "name":"Globo Feliz Cumpleaños 3", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/hb3.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para cumpleaños." },
+  { "id":"globo-cumpleanos-4", "name":"Globo Feliz Cumpleaños 4", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/hb4.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para cumpleaños." },
+  { "id":"globo-cumpleanos-5", "name":"Globo Feliz Cumpleaños 5", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/hb5.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para cumpleaños." },
+  { "id":"globo-cumpleanos-6", "name":"Globo Feliz Cumpleaños 6", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/hb6.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para cumpleaños." },
+  { "id":"globo-amor-1", "name":"Globo de Amor 1", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/love1.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para expresar amor." },
+  { "id":"globo-amor-2", "name":"Globo de Amor 2", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/love2.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para expresar amor." },
+  { "id":"globo-amor-3", "name":"Globo de Amor 3", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/love3.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para expresar amor." },
+  { "id":"globo-amor-4", "name":"Globo de Amor 4", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/love4.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para expresar amor." },
+  { "id":"globo-amor-5", "name":"Globo de Amor 5", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/love5.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para expresar amor." },
+  { "id":"globo-amor-6", "name":"Globo de Amor 6", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/love6.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo decorativo para expresar amor." },
+  { "id":"globo-sb-1", "name":"Globo Estrella Rosa Claro", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/sb1.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color rosa claro." },
+  { "id":"globo-sb-2", "name":"Globo Estrella Fucsia", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/sb2.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color fucsia." },
+  { "id":"globo-sb-3", "name":"Globo Estrella Fucsia Holográfica", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/sb3.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella fucsia con acabado holográfico." },
+  { "id":"globo-sg-1", "name":"Globo Estrella Oro Rosa", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/sg1.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color oro rosa." },
+  { "id":"globo-sg-2", "name":"Globo Estrella Morada", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/sg2.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color morado." },
+  { "id":"globo-sg-3", "name":"Globo Estrella Morada Holográfica", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/sg3.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella morada con acabado holográfico." },
+  { "id":"globo-sp-1", "name":"Globo Estrella Champán", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/sp1.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color champán." },
+  { "id":"globo-sp-2", "name":"Globo Estrella Plateada", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/sp2.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color plateado." },
+  { "id":"globo-sp-3", "name":"Globo Estrella Dorada Holográfica", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/sp3.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella dorada con acabado holográfico." },
+  { "id":"globo-sp-4", "name":"Globo Estrella Dorada", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/sp4.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color dorado." },
+  { "id":"globo-sp-5", "name":"Globo Estrella Roja", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/sp5.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color rojo." },
+  { "id":"globo-sp-6", "name":"Globo Estrella Turquesa", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/sp6.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color turquesa." },
+  { "id":"globo-sp-7", "name":"Globo Estrella Azul", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/sp7.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color azul." },
+  { "id":"globo-sr-1", "name":"Globo Estrella Verde", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/sr1.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color verde." },
+  { "id":"globo-ss-1", "name":"Globo Estrella Negra", "price":1500, "image":"https://grupoentregafotos.blob.core.windows.net/productos/globos/ss1.jpg", "categoria":"Regalos", "subcategoria":"Globos", "description":"Globo metálico en forma de estrella color negro." },
   /*FINAL GLOBOS*/
   
   
@@ -684,7 +683,7 @@ export const productos: Producto[] = [
     "id": "prod-61",
     "name": "Chanel Allure Sport",
     "price": 75000,
-    "image": "/productos/perfumes/caballero/AllureSport.webp",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/caballero/AllureSport.webp",
     "categoria": "Perfumes",
     "subcategoria": "Hombres",
     "description": "Hermoso detalle para regalar."
@@ -694,7 +693,7 @@ export const productos: Producto[] = [
     "id": "prod-55",
     "name": "212Heroes1",
     "price": 60000,
-    "image": "/productos/perfumes/caballero/212Heroes1.webp",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/caballero/212Heroes1.webp",
     "categoria": "Perfumes",
     "subcategoria": "Hombres",
     "description": "Hermoso detalle para regalar."
@@ -703,7 +702,7 @@ export const productos: Producto[] = [
     "id": "prod-56",
     "name": "212Heroes2",
     "price": 60000,
-    "image": "/productos/perfumes/caballero/212Heroes2.webp",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/caballero/212Heroes2.webp",
     "categoria": "Perfumes",
     "subcategoria": "Hombres",
     "description": "Hermoso detalle para regalar."
@@ -712,7 +711,7 @@ export const productos: Producto[] = [
     "id": "prod-57",
     "name": "212Men",
     "price": 60000,
-    "image": "/productos/perfumes/caballero/212Men.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/caballero/212Men.jpg",
     "categoria": "Perfumes",
     "subcategoria": "Hombres",
     "description": "Hermoso detalle para regalar."
@@ -721,7 +720,7 @@ export const productos: Producto[] = [
     "id": "prod-58",
     "name": "212Sexy",
     "price": 60000,
-    "image": "/productos/perfumes/caballero/212Sexy.webp",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/caballero/212Sexy.webp",
     "categoria": "Perfumes",
     "subcategoria": "Hombres",
     "description": "Hermoso detalle para regalar."
@@ -730,7 +729,7 @@ export const productos: Producto[] = [
     "id": "prod-59",
     "name": "212Vip",
     "price": 60000,
-    "image": "/productos/perfumes/caballero/212Vip.webp",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/caballero/212Vip.webp",
     "categoria": "Perfumes",
     "subcategoria": "Hombres",
     "description": "Hermoso detalle para regalar."
@@ -739,7 +738,7 @@ export const productos: Producto[] = [
     "id": "prod-60",
     "name": "212VIPBlack",
     "price": 60000,
-    "image": "/productos/perfumes/caballero/212VIPBlack.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/caballero/212VIPBlack.png",
     "categoria": "Perfumes",
     "subcategoria": "Hombres",
     "description": "Hermoso detalle para regalar."
@@ -749,7 +748,7 @@ export const productos: Producto[] = [
     "id": "prod-62",
     "name": "Bvlgari Terrae1",
     "price": 60000,
-    "image": "/productos/perfumes/caballero/BvlgariTerrae1.webp",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/caballero/BvlgariTerrae1.webp",
     "categoria": "Perfumes",
     "subcategoria": "Hombres",
     "description": "Hermoso detalle para regalar."
@@ -758,7 +757,7 @@ export const productos: Producto[] = [
     "id": "prod-63",
     "name": "Chanel Bleu",
     "price": 60000,
-    "image": "/productos/perfumes/caballero/ChanelBleu.webp",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/caballero/ChanelBleu.webp",
     "categoria": "Perfumes",
     "subcategoria": "Hombres",
     "description": "Hermoso detalle para regalar."
@@ -767,7 +766,7 @@ export const productos: Producto[] = [
     "id": "prod-64",
     "name": "CHBad Boy",
     "price": 60000,
-    "image": "/productos/perfumes/caballero/CHBadBoy.webp",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/caballero/CHBadBoy.webp",
     "categoria": "Perfumes",
     "subcategoria": "Hombres",
     "description": "Hermoso detalle para regalar."
@@ -776,7 +775,7 @@ export const productos: Producto[] = [
     "id": "prod-65",
     "name": "DGK",
     "price": 60000,
-    "image": "/productos/perfumes/caballero/DGK.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/caballero/DGK.jpg",
     "categoria": "Perfumes",
     "subcategoria": "Hombres",
     "description": "Hermoso detalle para regalar."
@@ -785,7 +784,7 @@ export const productos: Producto[] = [
     "id": "prod-66",
     "name": "DGThe One Grey",
     "price": 60000,
-    "image": "/productos/perfumes/caballero/DGTheOneGrey.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/caballero/DGTheOneGrey.jpg",
     "categoria": "Perfumes",
     "subcategoria": "Hombres",
     "description": "Hermoso detalle para regalar."
@@ -794,7 +793,7 @@ export const productos: Producto[] = [
     "id": "prod-67",
     "name": "Dior Sauvage",
     "price": 60000,
-    "image": "/productos/perfumes/caballero/DiorSauvage.webp",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/caballero/DiorSauvage.webp",
     "categoria": "Perfumes",
     "subcategoria": "Hombres",
     "description": "Hermoso detalle para regalar."
@@ -803,7 +802,7 @@ export const productos: Producto[] = [
     "id": "prod-68",
     "name": "EDT",
     "price": 60000,
-    "image": "/productos/perfumes/caballero/EDT.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/caballero/EDT.jpg",
     "categoria": "Perfumes",
     "subcategoria": "Hombres",
     "description": "Hermoso detalle para regalar."
@@ -812,7 +811,7 @@ export const productos: Producto[] = [
     "id": "prod-69",
     "name": "GCPour Homme",
     "price": 60000,
-    "image": "/productos/perfumes/caballero/GCPourHomme.webp",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/caballero/GCPourHomme.webp",
     "categoria": "Perfumes",
     "subcategoria": "Hombres",
     "description": "Hermoso detalle para regalar."
@@ -821,7 +820,7 @@ export const productos: Producto[] = [
     "id": "prod-70",
     "name": "Moschino Toy Boy",
     "price": 60000,
-    "image": "/productos/perfumes/caballero/MoschinoToyBoy.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/caballero/MoschinoToyBoy.jpg",
     "categoria": "Perfumes",
     "subcategoria": "Hombres",
     "description": "Hermoso detalle para regalar."
@@ -830,7 +829,7 @@ export const productos: Producto[] = [
     "id": "prod-71",
     "name": "PR1Million",
     "price": 60000,
-    "image": "/productos/perfumes/caballero/PR1Million.webp",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/caballero/PR1Million.webp",
     "categoria": "Perfumes",
     "subcategoria": "Hombres",
     "description": "Hermoso detalle para regalar."
@@ -839,7 +838,7 @@ export const productos: Producto[] = [
     "id": "prod-72",
     "name": "PRInvictus",
     "price": 60000,
-    "image": "/productos/perfumes/caballero/PRInvictus.webp",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/caballero/PRInvictus.webp",
     "categoria": "Perfumes",
     "subcategoria": "Hombres",
     "description": "Hermoso detalle para regalar."
@@ -848,7 +847,7 @@ export const productos: Producto[] = [
     "id": "prod-73",
     "name": "PRPhanton",
     "price": 60000,
-    "image": "/productos/perfumes/caballero/PRPhanton.webp",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/caballero/PRPhanton.webp",
     "categoria": "Perfumes",
     "subcategoria": "Hombres",
     "description": "Hermoso detalle para regalar."
@@ -857,7 +856,7 @@ export const productos: Producto[] = [
     "id": "prod-74",
     "name": "PRPhanton Elixir",
     "price": 60000,
-    "image": "/productos/perfumes/caballero/PRPhantonElixir.webp",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/caballero/PRPhantonElixir.webp",
     "categoria": "Perfumes",
     "subcategoria": "Hombres",
     "description": "Hermoso detalle para regalar."
@@ -866,7 +865,7 @@ export const productos: Producto[] = [
     "id": "prod-75",
     "name": "Pure XS",
     "price": 60000,
-    "image": "/productos/perfumes/caballero/PureXS.webp",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/caballero/PureXS.webp",
     "categoria": "Perfumes",
     "subcategoria": "Hombres",
     "description": "Hermoso detalle para regalar."
@@ -875,7 +874,7 @@ export const productos: Producto[] = [
     "id": "prod-76",
     "name": "Pure XSEdt",
     "price": 60000,
-    "image": "/productos/perfumes/caballero/PureXSEdt.webp",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/caballero/PureXSEdt.webp",
     "categoria": "Perfumes",
     "subcategoria": "Hombres",
     "description": "Hermoso detalle para regalar."
@@ -884,7 +883,7 @@ export const productos: Producto[] = [
     "id": "prod-77",
     "name": "Versace Eros Flame",
     "price": 60000,
-    "image": "/productos/perfumes/caballero/VersaceErosFlame.webp",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/caballero/VersaceErosFlame.webp",
     "categoria": "Perfumes",
     "subcategoria": "Hombres",
     "description": "Hermoso detalle para regalar."
@@ -895,7 +894,7 @@ export const productos: Producto[] = [
     "id": "prod-78",
     "name": "AGCloud",
     "price": 60000,
-    "image": "/productos/perfumes/dama/AGCloud.webp",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/dama/AGCloud.webp",
     "categoria": "Perfumes",
     "subcategoria": "Mujeres",
     "description": "Hermoso detalle para regalar."
@@ -904,7 +903,7 @@ export const productos: Producto[] = [
     "id": "prod-79",
     "name": "CHCH1",
     "price": 60000,
-    "image": "/productos/perfumes/dama/CHCH1.webp",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/dama/CHCH1.webp",
     "categoria": "Perfumes",
     "subcategoria": "Mujeres",
     "description": "Hermoso detalle para regalar."
@@ -913,7 +912,7 @@ export const productos: Producto[] = [
     "id": "prod-80",
     "name": "DGLight Blue",
     "price": 60000,
-    "image": "/productos/perfumes/dama/DGLightBlue.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/dama/DGLightBlue.jpg",
     "categoria": "Perfumes",
     "subcategoria": "Mujeres",
     "description": "Hermoso detalle para regalar."
@@ -922,7 +921,7 @@ export const productos: Producto[] = [
     "id": "prod-81",
     "name": "Lancome La Vie Est Belle",
     "price": 60000,
-    "image": "/productos/perfumes/dama/LancomeLaVieEstBelle.webp",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/dama/LancomeLaVieEstBelle.webp",
     "categoria": "Perfumes",
     "subcategoria": "Mujeres",
     "description": "Hermoso detalle para regalar."
@@ -931,7 +930,7 @@ export const productos: Producto[] = [
     "id": "prod-82",
     "name": "Moschino Funny",
     "price": 60000,
-    "image": "/productos/perfumes/dama/MoschinoFunny.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/dama/MoschinoFunny.jpg",
     "categoria": "Perfumes",
     "subcategoria": "Mujeres",
     "description": "Hermoso detalle para regalar."
@@ -940,7 +939,7 @@ export const productos: Producto[] = [
     "id": "prod-83",
     "name": "PRLady Million",
     "price": 60000,
-    "image": "/productos/perfumes/dama/PRLadyMillion.webp",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/dama/PRLadyMillion.webp",
     "categoria": "Perfumes",
     "subcategoria": "Mujeres",
     "description": "Hermoso detalle para regalar."
@@ -949,7 +948,7 @@ export const productos: Producto[] = [
     "id": "prod-84",
     "name": "Versace Yellow Diamond",
     "price": 60000,
-    "image": "/productos/perfumes/dama/VersaceYellowDiamond.webp",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/perfumes/dama/VersaceYellowDiamond.webp",
     "categoria": "Perfumes",
     "subcategoria": "Mujeres",
     "description": "Hermoso detalle para regalar."
@@ -961,7 +960,7 @@ export const productos: Producto[] = [
     "id": "prod-85",
     "name": "Ramo Girasol/Rosa",
     "price": 20000,
-    "image": "/productos/ramos/boda/bouquet1.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/boda/bouquet1.png",
     "categoria": "Ramos",
     "subcategoria": "Boda",
     "description": "Hermoso detalle para regalar."
@@ -970,7 +969,7 @@ export const productos: Producto[] = [
     "id": "prod-86",
     "name": "Ramo Rosa",
     "price": 20000,
-    "image": "/productos/ramos/boda/bouquet2.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/boda/bouquet2.png",
     "categoria": "Ramos",
     "subcategoria": "Boda",
     "description": "Hermoso detalle para regalar."
@@ -979,7 +978,7 @@ export const productos: Producto[] = [
     "id": "prod-87",
     "name": "Ramo Rosa/Eucalipto",
     "price": 20000,
-    "image": "/productos/ramos/boda/bouquet3.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/boda/bouquet3.png",
     "categoria": "Ramos",
     "subcategoria": "Boda",
     "description": "Hermoso detalle para regalar."
@@ -988,7 +987,7 @@ export const productos: Producto[] = [
     "id": "prod-88",
     "name": "Ramo Rosa/Eucalipto",
     "price": 20000,
-    "image": "/productos/ramos/boda/bouquet4.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/boda/bouquet4.png",
     "categoria": "Ramos",
     "subcategoria": "Boda",
     "description": "Hermoso detalle para regalar."
@@ -997,7 +996,7 @@ export const productos: Producto[] = [
     "id": "prod-89",
     "name": "Ramo Rosa/Eucalipto",
     "price": 20000,
-    "image": "/productos/ramos/boda/bouquet5.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/boda/bouquet5.png",
     "categoria": "Ramos",
     "subcategoria": "Boda",
     "description": "Hermoso detalle para regalar."
@@ -1006,7 +1005,7 @@ export const productos: Producto[] = [
     "id": "prod-90",
     "name": "Ramo Rosa/Lirio",
     "price": 20000,
-    "image": "/productos/ramos/boda/bouquet6.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/boda/bouquet6.png",
     "categoria": "Ramos",
     "subcategoria": "Boda",
     "description": "Hermoso detalle para regalar."
@@ -1015,7 +1014,7 @@ export const productos: Producto[] = [
     "id": "prod-91",
     "name": "Ramo Girasol/Margarita",
     "price": 20000,
-    "image": "/productos/ramos/boda/bouquet7.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/boda/bouquet7.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Boda",
     "description": "Hermoso detalle para regalar."
@@ -1025,7 +1024,7 @@ export const productos: Producto[] = [
     "id": "prod-92",
     "name": "Boutonniere Girasol",
     "price": 7000,
-    "image": "/productos/ramos/boda/Boutonniere1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/boda/Boutonniere1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Boda",
     "description": "Hermoso detalle para regalar."
@@ -1034,7 +1033,7 @@ export const productos: Producto[] = [
     "id": "prod-93",
     "name": "Boutonniere Rosa",
     "price": 7000,
-    "image": "/productos/ramos/boda/Boutonniere2.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/boda/Boutonniere2.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Boda",
     "description": "Hermoso detalle para regalar."
@@ -1043,7 +1042,7 @@ export const productos: Producto[] = [
     "id": "prod-94",
     "name": "Boutonniere Rosa",
     "price": 7000,
-    "image": "/productos/ramos/boda/Boutonniere3.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/boda/Boutonniere3.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Boda",
     "description": "Hermoso detalle para regalar."
@@ -1052,7 +1051,7 @@ export const productos: Producto[] = [
     "id": "prod-95",
     "name": "Boutonniere Rosa",
     "price": 7000,
-    "image": "/productos/ramos/boda/Boutonniere4.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/boda/Boutonniere4.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Boda",
     "description": "Hermoso detalle para regalar."
@@ -1061,7 +1060,7 @@ export const productos: Producto[] = [
     "id": "prod-96",
     "name": "Boutonniere Rosa",
     "price": 7000,
-    "image": "/productos/ramos/boda/Boutonniere5.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/boda/Boutonniere5.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Boda",
     "description": "Hermoso detalle para regalar."
@@ -1070,7 +1069,7 @@ export const productos: Producto[] = [
     "id": "prod-97",
     "name": "Boutonniere Rosa",
     "price": 7000,
-    "image": "/productos/ramos/boda/Boutonniere6.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/boda/Boutonniere6.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Boda",
     "description": "Hermoso detalle para regalar."
@@ -1079,7 +1078,7 @@ export const productos: Producto[] = [
     "id": "prod-98",
     "name": "Boutonniere Gypsophila",
     "price": 7000,
-    "image": "/productos/ramos/boda/Boutonniere7.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/boda/Boutonniere7.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Boda",
     "description": "Hermoso detalle para regalar."
@@ -1088,7 +1087,7 @@ export const productos: Producto[] = [
     "id": "prod-99",
     "name": "Boutonniere Rosa",
     "price": 7000,
-    "image": "/productos/ramos/boda/Boutonniere8.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/boda/Boutonniere8.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Boda",
     "description": "Hermoso detalle para regalar."
@@ -1101,9 +1100,9 @@ export const productos: Producto[] = [
     "price": 60000,
     "hasCarousel": true,
     "images": [
-      "/productos/ramos/grandes/ramoBig721.jpg",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramoBig721.jpg",
     ],
-    "image": "/productos/ramos/grandes/ramoBig722.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramoBig722.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1114,9 +1113,9 @@ export const productos: Producto[] = [
     "price": 35000,
     "hasCarousel": true,
     "images": [
-      "/productos/ramos/grandes/ramoBig12Gerbera1.mp4",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramoBig12Gerbera1.mp4",
     ],
-    "image": "/productos/ramos/grandes/ramoBig12Gerbera1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramoBig12Gerbera1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1127,9 +1126,9 @@ export const productos: Producto[] = [
     "price": 30000,
     "hasCarousel": true,
     "images": [
-      "/productos/ramos/grandes/ram20BigRosas2.jpeg",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ram20BigRosas2.jpeg",
     ],
-    "image": "/productos/ramos/grandes/ram20BigRosas1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ram20BigRosas1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1142,10 +1141,10 @@ export const productos: Producto[] = [
     "price": 24000,
     "hasCarousel": true,
     "images": [
-      "/productos/ramos/grandes/ramoBigGerbera1.jpeg",
-      "/productos/ramos/grandes/ramoBigGerbera1.mp4",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramoBigGerbera1.jpeg",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramoBigGerbera1.mp4",
     ],
-    "image": "/productos/ramos/grandes/ramoBigGerbera2.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramoBigGerbera2.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1154,7 +1153,7 @@ export const productos: Producto[] = [
     "id": "prod-202",
     "name": "Ramo de chocolates",
     "price": 20000,
-    "image": "/productos/ramos/grandes/ramBigChoco1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramBigChoco1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1165,10 +1164,10 @@ export const productos: Producto[] = [
     "price": 30000,
     "hasCarousel": true,
     "images": [
-      "/productos/ramos/grandes/ramBigRosa2.jpeg",
-      "/productos/ramos/grandes/ramBigRosa1.mp4",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramBigRosa2.jpeg",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramBigRosa1.mp4",
     ],
-    "image": "/productos/ramos/grandes/ramBigRosa1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramBigRosa1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1180,9 +1179,9 @@ export const productos: Producto[] = [
     "price": 30000,
     "hasCarousel": true,
     "images": [
-      "/productos/ramos/grandes/ram18BigRosas4.mp4",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ram18BigRosas4.mp4",
     ],
-    "image": "/productos/ramos/grandes/ram18BigRosas4.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ram18BigRosas4.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1193,7 +1192,7 @@ export const productos: Producto[] = [
     "name": "Ramo 20 rosas",
     "price": 30000,
     "hasCarousel": true,
-    "image": "/productos/ramos/grandes/ram18BigRosas3.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ram18BigRosas3.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1204,7 +1203,7 @@ export const productos: Producto[] = [
     "name": "Ramo 15 rosas",
     "price": 30000,
     "hasCarousel": true,
-    "image": "/productos/ramos/grandes/ram15BigRosas3.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ram15BigRosas3.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1216,10 +1215,10 @@ export const productos: Producto[] = [
     "price": 22000,
     "hasCarousel": true,
     "images": [
-      "/productos/ramos/grandes/ram12BigRosas2.jpeg",
-      "/productos/ramos/grandes/ram12BigRosas1.mp4",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ram12BigRosas2.jpeg",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ram12BigRosas1.mp4",
     ],
-    "image": "/productos/ramos/grandes/ram12BigRosas1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ram12BigRosas1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1230,10 +1229,10 @@ export const productos: Producto[] = [
     "price": 12000,
     "hasCarousel": true,
     "images": [
-      "/productos/ramos/grandes/ram7Mix2.jpeg",
-      "/productos/ramos/grandes/ram7Mix3.jpeg",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ram7Mix2.jpeg",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ram7Mix3.jpeg",
     ],
-    "image": "/productos/ramos/grandes/ram7Mix1.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ram7Mix1.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1244,9 +1243,9 @@ export const productos: Producto[] = [
     "price": 12000,
     "hasCarousel": true,
     "images": [
-      "/productos/ramos/grandes/ram6BigMix1.mp4",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ram6BigMix1.mp4",
     ],
-    "image": "/productos/ramos/grandes/ram6BigMix1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ram6BigMix1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1259,9 +1258,9 @@ export const productos: Producto[] = [
     "price": 12000,
     "hasCarousel": true,
     "images": [
-      "/productos/ramos/grandes/ram6BigRosas1.jpeg",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ram6BigRosas1.jpeg",
     ],
-    "image": "/productos/ramos/grandes/ram6BigRosas2.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ram6BigRosas2.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1271,7 +1270,7 @@ export const productos: Producto[] = [
     "name": "Ramo Primaveral",
     "price": 12000,
     "hasCarousel": true,
-    "image": "/productos/ramos/grandes/ram6BigGirasol1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ram6BigGirasol1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1282,9 +1281,9 @@ export const productos: Producto[] = [
     "price": 12000,
     "hasCarousel": true,
     "images": [
-      "/productos/ramos/grandes/ram5BigRosas1.mp4",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ram5BigRosas1.mp4",
     ],
-    "image": "/productos/ramos/grandes/ram5BigRosas1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ram5BigRosas1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1299,9 +1298,9 @@ export const productos: Producto[] = [
     "price": 22000,
     "hasCarousel": true,
     "images": [
-      "/productos/ramos/grandes/ramBigPrimaveral2.jpeg",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramBigPrimaveral2.jpeg",
     ],
-    "image": "/productos/ramos/grandes/ramBigPrimaveral1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramBigPrimaveral1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1311,11 +1310,11 @@ export const productos: Producto[] = [
     "name": "Ramo Primaveral",
     "hasCarousel": true,
     "images": [
-      "/productos/ramos/grandes/ramBigPrimaveral5.jpeg",
-      "/productos/ramos/grandes/ramBigPrimaveral6.jpeg",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramBigPrimaveral5.jpeg",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramBigPrimaveral6.jpeg",
     ],
     "price": 22000,
-    "image": "/productos/ramos/grandes/ramBigPrimaveral4.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramBigPrimaveral4.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1325,11 +1324,11 @@ export const productos: Producto[] = [
     "name": "Ramo 12 girasoles con astromelias",
     "hasCarousel": true,
     "images": [
-      "/productos/ramos/grandes/ramBigGirasol2.jpeg",
-      "/productos/ramos/grandes/ramBigGirasol1.mp4",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramBigGirasol2.jpeg",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramBigGirasol1.mp4",
     ],
     "price": 25000,
-    "image": "/productos/ramos/grandes/ramBigGirasol1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramBigGirasol1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1342,10 +1341,10 @@ export const productos: Producto[] = [
     "images": [
       
       
-      "/productos/ramos/grandes/ramBigPrimaveral11.jpeg",
-      "/productos/ramos/grandes/ramBigPrimaveral9.mp4",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramBigPrimaveral11.jpeg",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramBigPrimaveral9.mp4",
     ],
-    "image": "/productos/ramos/grandes/ramBigPrimaveral9.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramBigPrimaveral9.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1356,9 +1355,9 @@ export const productos: Producto[] = [
     "price": 22000,
     "hasCarousel": true,
     "images": [
-      "/productos/ramos/grandes/ramBigPrimaveral8.jpeg",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramBigPrimaveral8.jpeg",
     ],
-    "image": "/productos/ramos/grandes/ramBigPrimaveral7.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramBigPrimaveral7.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1367,7 +1366,7 @@ export const productos: Producto[] = [
     "id": "prod-209",
     "name": "Ramo Primaveral",
     "price": 20000,
-    "image": "/productos/ramos/grandes/ramBigPrimaveral3.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramBigPrimaveral3.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1377,11 +1376,11 @@ export const productos: Producto[] = [
     "name": "Ramo Margaritas",
     "hasCarousel": true,
     "images": [
-      "/productos/ramos/grandes/ramBigMarg2.jpeg",
-      "/productos/ramos/grandes/ramBigMarg1.mp4",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramBigMarg2.jpeg",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramBigMarg1.mp4",
     ],
     "price": 15000,
-    "image": "/productos/ramos/grandes/ramBigMarg1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramBigMarg1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1392,9 +1391,9 @@ export const productos: Producto[] = [
     "price": 36000,
     "hasCarousel": true,
     "images": [
-      "/productos/ramos/grandes/ram16BigTuli2.png",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ram16BigTuli2.png",
     ],
-    "image": "/productos/ramos/grandes/ram16BigTuli1.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ram16BigTuli1.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1404,10 +1403,10 @@ export const productos: Producto[] = [
     "name": "Ramo Primaveral",
     "hasCarousel": true,
     "images": [
-      "/productos/ramos/grandes/ram12BigPrima2.jpg",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ram12BigPrima2.jpg",
     ],
     "price": 20000,
-    "image": "/productos/ramos/grandes/ram12BigPrima1.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ram12BigPrima1.jpg",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1416,7 +1415,7 @@ export const productos: Producto[] = [
     "id": "prod-212",
     "name": "Ramo Primaveral + 5 chocolates",
     "price": 30000,
-    "image": "/productos/ramos/grandes/ram12BigPrima3.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ram12BigPrima3.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1426,10 +1425,10 @@ export const productos: Producto[] = [
     "name": "Ramo Rosa",
     "hasCarousel": true,
     "images": [
-      "/productos/ramos/grandes/ramoPreRosa2.png",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramoPreRosa2.png",
     ],
     "price": 12000,
-    "image": "/productos/ramos/grandes/ramoPreRosa1.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramoPreRosa1.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1438,7 +1437,7 @@ export const productos: Producto[] = [
     "id": "prod-134",
     "name": "Ramo Rosado2",
     "price": 45000,
-    "image": "/productos/ramos/grandes/RamoRosado2.jpg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/RamoRosado2.jpg",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1449,9 +1448,9 @@ export const productos: Producto[] = [
     "price": 30000,
     "hasCarousel": true,
     "images": [
-      "/productos/ramos/grandes/ramoPreRoja2.png",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramoPreRoja2.png",
     ],
-    "image": "/productos/ramos/grandes/ramoPreRoja1.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramoPreRoja1.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1460,7 +1459,7 @@ export const productos: Producto[] = [
     "id": "prod-215",
     "name": "Ramo 12 rosas con eucalipto",
     "price": 25000,
-    "image": "/productos/ramos/grandes/ramoPre3.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramoPre3.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1469,7 +1468,7 @@ export const productos: Producto[] = [
     "id": "prod-216",
     "name": "Ramo Rosa/Liria",
     "price": 28000,
-    "image": "/productos/ramos/grandes/ramoPre4.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramoPre4.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1478,7 +1477,7 @@ export const productos: Producto[] = [
     "id": "prod-217",
     "name": "Ramo de 20 rosas con follaje",
     "price": 30000,
-    "image": "/productos/ramos/grandes/ramoPre5.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramoPre5.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1487,7 +1486,7 @@ export const productos: Producto[] = [
     "id": "prod-218",
     "name": "Ramo Clavel",
     "price": 12000,
-    "image": "/productos/ramos/grandes/ramoClavel1.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramoClavel1.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1496,7 +1495,7 @@ export const productos: Producto[] = [
     "id": "prod-219",
     "name": "Ramo Girasol",
     "price": 15000,
-    "image": "/productos/ramos/grandes/ramoGirasol1.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramoGirasol1.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1506,7 +1505,7 @@ export const productos: Producto[] = [
     "name": "Ramo Girasol",
     "price": 15000,
     "hasCarousel": true,
-    "image":"/productos/ramos/grandes/ramoGirasol2.png",
+    "image":"https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/ramoGirasol2.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1520,9 +1519,9 @@ export const productos: Producto[] = [
     "price": 45000,
     "hasCarousel": true,
     "images": [
-      "/productos/ramos/grandes/RamoGierbera2.png"
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/RamoGierbera2.png"
     ],
-    "image": "/productos/ramos/grandes/RamoGierbera1.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/RamoGierbera1.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1531,7 +1530,7 @@ export const productos: Producto[] = [
     "id": "prod-133",
     "name": "Ramo Rosado1",
     "price": 45000,
-    "image": "/productos/ramos/grandes/RamoRosado1.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/grandes/RamoRosado1.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos Grandes",
     "description": "Hermoso detalle para regalar."
@@ -1543,7 +1542,7 @@ export const productos: Producto[] = [
     "id": "prod-154",
     "name": "4 Girasoles",
     "price": 9500,
-    "image": "/productos/ramos/peque/ramPeqGirasol2.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeqGirasol2.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1552,7 +1551,7 @@ export const productos: Producto[] = [
     "id": "prod-155",
     "name": "4 Girasoles",
     "price": 9500,
-    "image": "/productos/ramos/peque/ramPeqGirasol3.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeqGirasol3.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1562,7 +1561,7 @@ export const productos: Producto[] = [
     "id": "prod-156",
     "name": "4 Rosas",
     "price": 9500,
-    "image": "/productos/ramos/peque/ramPeq4Rosa1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeq4Rosa1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1571,7 +1570,7 @@ export const productos: Producto[] = [
     "id": "prod-157",
     "name": "4 Gerberas",
     "price": 9500,
-    "image": "/productos/ramos/peque/ramPeq4Gerbera1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeq4Gerbera1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1580,7 +1579,7 @@ export const productos: Producto[] = [
     "id": "prod-158",
     "name": "3 Rosas con Globo",
     "price": 9000,
-    "image": "/productos/ramos/peque/ramPeq3Rosa.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeq3Rosa.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1589,7 +1588,7 @@ export const productos: Producto[] = [
     "id": "prod-159",
     "name": "2 Gerberas 1 Girasol con Globo",
     "price": 9000,
-    "image": "/productos/ramos/peque/ramPeq3Mix2.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeq3Mix2.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1599,7 +1598,7 @@ export const productos: Producto[] = [
     "id": "prod-160",
     "name": "2 Gerberas/1 Rosa",
     "price": 7500,
-    "image": "/productos/ramos/peque/ramPeq3Mix1.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeq3Mix1.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1608,7 +1607,7 @@ export const productos: Producto[] = [
     "id": "prod-161",
     "name": "3 Girasoles",
     "price": 7500,
-    "image": "/productos/ramos/peque/ramPeqGirasol1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeqGirasol1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1617,7 +1616,7 @@ export const productos: Producto[] = [
     "id": "prod-162",
     "name": "3 Girasoles",
     "price": 7500,
-    "image": "/productos/ramos/peque/ram3Girasol1.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ram3Girasol1.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1626,7 +1625,7 @@ export const productos: Producto[] = [
     "id": "prod-163",
     "name": "Rosa/Girasol/Gerbera",
     "price": 7500,
-    "image": "/productos/ramos/peque/ram3PeqGirarsolGierberaRosa1.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ram3PeqGirarsolGierberaRosa1.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1635,7 +1634,7 @@ export const productos: Producto[] = [
     "id": "prod-164",
     "name": "2 Rosas/1Gerbera",
     "price": 7500,
-    "image": "/productos/ramos/peque/ram3PeqRosaGierbera1.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ram3PeqRosaGierbera1.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1644,7 +1643,7 @@ export const productos: Producto[] = [
     "id": "prod-145",
     "name": "Girasol/Gerbera",
     "price": 25000,
-    "image": "/productos/ramos/peque/ram2PeqGirasolGierbera1.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ram2PeqGirasolGierbera1.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1653,7 +1652,7 @@ export const productos: Producto[] = [
     "id": "prod-165",
     "name": "3 Gerberas",
     "price": 7500,
-    "image": "/productos/ramos/peque/ram2PeGierbera1.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ram2PeGierbera1.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1662,7 +1661,7 @@ export const productos: Producto[] = [
     "id": "prod-144",
     "name": "2 Gerberas",
     "price": 6000,
-    "image": "/productos/ramos/peque/ram2PeGierbera3.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ram2PeGierbera3.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1671,7 +1670,7 @@ export const productos: Producto[] = [
     "id": "prod-166",
     "name": "2 Rosas",
     "price": 5500,
-    "image": "/productos/ramos/peque/ramPeq2Rosa.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeq2Rosa.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1680,7 +1679,7 @@ export const productos: Producto[] = [
     "id": "prod-167",
     "name": "2 Rosas",
     "price": 5500,
-    "image": "/productos/ramos/peque/ram2PeqRosa1.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ram2PeqRosa1.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1691,9 +1690,9 @@ export const productos: Producto[] = [
     "price": 5500,
     "hasCarousel": true,
      "images": [
-      "/productos/ramos/peque/ramPeq2Girasol2.mp4"
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeq2Girasol2.mp4"
     ],
-    "image": "/productos/ramos/peque/ramPeq2Girasol2.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeq2Girasol2.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1702,7 +1701,7 @@ export const productos: Producto[] = [
     "id": "prod-185",
     "name": "Tulipán",
     "price": 5000,
-    "image": "/productos/ramos/peque/ram1PeTuli1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ram1PeTuli1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1712,7 +1711,7 @@ export const productos: Producto[] = [
     "id": "prod-168",
     "name": "Girasol",
     "price": 3500,
-    "image": "/productos/ramos/peque/ramPeq1Girasol3.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeq1Girasol3.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1720,7 +1719,7 @@ export const productos: Producto[] = [
     "id": "prod-168",
     "name": "Girasol",
     "price": 3500,
-    "image": "/productos/ramos/peque/ramPeq1Girasol4.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeq1Girasol4.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1728,7 +1727,7 @@ export const productos: Producto[] = [
     "id": "prod-168",
     "name": "Girasol",
     "price": 3500,
-    "image": "/productos/ramos/peque/ramPeq1Girasol5.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeq1Girasol5.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1736,7 +1735,7 @@ export const productos: Producto[] = [
     "id": "prod-168",
     "name": "Girasol",
     "price": 3500,
-    "image": "/productos/ramos/peque/ramPeq1Girasol6.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeq1Girasol6.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1744,7 +1743,7 @@ export const productos: Producto[] = [
     "id": "prod-168",
     "name": "Girasol",
     "price": 3500,
-    "image": "/productos/ramos/peque/ramPeq1Girasol7.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeq1Girasol7.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1752,7 +1751,7 @@ export const productos: Producto[] = [
     "id": "prod-168",
     "name": "Girasol",
     "price": 3500,
-    "image": "/productos/ramos/peque/ramPeq1Girasol8.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeq1Girasol8.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1762,7 +1761,7 @@ export const productos: Producto[] = [
     "id": "prod-168",
     "name": "Girasol",
     "price": 3500,
-    "image": "/productos/ramos/peque/ramPeq1Girasol2.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeq1Girasol2.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1771,7 +1770,7 @@ export const productos: Producto[] = [
     "id": "prod-169",
     "name": "Girasol con eucalipto y gipsofilia",
     "price": 3500,
-    "image": "/productos/ramos/peque/uniGirasol4.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/uniGirasol4.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1780,10 +1779,10 @@ export const productos: Producto[] = [
     "id": "prod-150",
     "name": "2 Lirios/1Rosa/1Clavel",
     "price": 9000,
-    "image": "/productos/ramos/peque/ram4PeLirioRosaClavel1.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ram4PeLirioRosaClavel1.png",
     hasCarousel: true,
     images: [
-      "/productos/ramos/peque/ram4PeLirioRosaClavel2.png",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ram4PeLirioRosaClavel2.png",
     ],
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
@@ -1793,7 +1792,7 @@ export const productos: Producto[] = [
     "id": "prod-143",
     "name": "2 Gerberas",
     "price": 6000,
-    "image": "/productos/ramos/peque/ram2PeGierbera2.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ram2PeGierbera2.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1803,7 +1802,7 @@ export const productos: Producto[] = [
     "id": "prod-170",
     "name": "Gerbera",
     "price": 3500,
-    "image": "/productos/ramos/peque/ramPeq1Gierbera1.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeq1Gierbera1.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1811,7 +1810,7 @@ export const productos: Producto[] = [
     "id": "prod-171",
     "name": "Gerbera",
     "price": 3500,
-    "image": "/productos/ramos/peque/ramPeq1Gierbera2.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeq1Gierbera2.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1819,7 +1818,7 @@ export const productos: Producto[] = [
     "id": "prod-172",
     "name": "Gerbera",
     "price": 3500,
-    "image": "/productos/ramos/peque/ramPeq1Gierbera3.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeq1Gierbera3.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1827,7 +1826,7 @@ export const productos: Producto[] = [
     "id": "prod-173",
     "name": "Gerbera",
     "price": 3500,
-    "image": "/productos/ramos/peque/ramPeq1Gierbera4.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeq1Gierbera4.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1835,7 +1834,7 @@ export const productos: Producto[] = [
     "id": "prod-174",
     "name": "Gerbera",
     "price": 3500,
-    "image": "/productos/ramos/peque/ramPeq1Gierbera5.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeq1Gierbera5.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1843,7 +1842,7 @@ export const productos: Producto[] = [
     "id": "prod-175",
     "name": "Gerbera",
     "price": 3500,
-    "image": "/productos/ramos/peque/ramPeq1Gierbera6.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeq1Gierbera6.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1851,7 +1850,7 @@ export const productos: Producto[] = [
     "id": "prod-176",
     "name": "Gerbera",
     "price": 3500,
-    "image": "/productos/ramos/peque/ramPeq1Gierbera9.png",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeq1Gierbera9.png",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1859,7 +1858,7 @@ export const productos: Producto[] = [
     "id": "prod-177",
     "name": "Gerbera",
     "price": 3500,
-    "image": "/productos/ramos/peque/ramPeq1Gierbera10.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeq1Gierbera10.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1867,7 +1866,7 @@ export const productos: Producto[] = [
     "id": "prod-178",
     "name": "Gerbera",
     "price": 3500,
-    "image": "/productos/ramos/peque/ramPeq1Gierbera11.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramPeq1Gierbera11.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1876,7 +1875,7 @@ export const productos: Producto[] = [
     "id": "prod-179",
     "name": "Gerbera",
     "price": 3500,
-    "image": "/productos/ramos/peque/ram1PeGierbera1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ram1PeGierbera1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1885,7 +1884,7 @@ export const productos: Producto[] = [
     "id": "prod-180",
     "name": "Gerbera",
     "price": 3500,
-    "image": "/productos/ramos/peque/ram1PeGierbera2.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ram1PeGierbera2.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1894,7 +1893,7 @@ export const productos: Producto[] = [
     "id": "prod-181",
     "name": "Gerbera",
     "price": 3500,
-    "image": "/productos/ramos/peque/ram1PeGierbera3.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ram1PeGierbera3.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1903,7 +1902,7 @@ export const productos: Producto[] = [
     "id": "prod-182",
     "name": "Gerbera",
     "price": 3500,
-    "image": "/productos/ramos/peque/ram1PeGierbera4.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ram1PeGierbera4.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1912,7 +1911,7 @@ export const productos: Producto[] = [
     "id": "prod-183",
     "name": "Gerbera",
     "price": 3500,
-    "image": "/productos/ramos/peque/ram1PeGierbera5.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ram1PeGierbera5.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1921,7 +1920,7 @@ export const productos: Producto[] = [
     "id": "prod-184",
     "name": "Gerbera",
     "price": 3500,
-    "image": "/productos/ramos/peque/ram1PeGierbera6.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ram1PeGierbera6.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
@@ -1933,9 +1932,9 @@ export const productos: Producto[] = [
     "price": 1500,
     "hasCarousel": true,
     "images": [
-      "/productos/ramos/peque/ramFolPeq2.jpeg",
+      "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramFolPeq2.jpeg",
     ],
-    "image": "/productos/ramos/peque/ramFolPeq1.jpeg",
+    "image": "https://grupoentregafotos.blob.core.windows.net/productos/ramos/peque/ramFolPeq1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
