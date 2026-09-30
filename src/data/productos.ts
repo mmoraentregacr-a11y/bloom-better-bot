@@ -91,6 +91,15 @@ export const productos: Producto[] = [
   },
   {
     "id": "prod-293",
+    "name": "Globo con dulces Grande",
+    "price": 15000,
+    "image": "/productos/cajas/globoDulces1.jpeg",
+    "categoria": "Ramos",
+    "subcategoria": "Cajas y Jarrones",
+    "description": "Hermoso detalle para regalar."
+  },
+  {
+    "id": "prod-293",
     "name": "Caja de dulces Grande",
     "price": 22500,
     "hasCarousel": true,
@@ -1689,6 +1698,15 @@ export const productos: Producto[] = [
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
   },
+  {
+    "id": "prod-185",
+    "name": "Tulipán",
+    "price": 5000,
+    "image": "/productos/ramos/peque/ram1PeTuli1.jpeg",
+    "categoria": "Ramos",
+    "subcategoria": "Ramos pequeños",
+    "description": "Hermoso detalle para regalar."
+  },
   
 {
     "id": "prod-168",
@@ -1908,14 +1926,20 @@ export const productos: Producto[] = [
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
   },
+
   {
-    "id": "prod-185",
-    "name": "Tulipán",
-    "price": 5000,
-    "image": "/productos/ramos/peque/ram1PeTuli1.jpeg",
+    "id": "prod-184",
+    "name": "Mini Ramo",
+    "price": 1500,
+    "hasCarousel": true,
+    "images": [
+      "/productos/ramos/peque/ramFolPeq2.jpeg",
+    ],
+    "image": "/productos/ramos/peque/ramFolPeq1.jpeg",
     "categoria": "Ramos",
     "subcategoria": "Ramos pequeños",
     "description": "Hermoso detalle para regalar."
   },
+  
   /*FINAL RAMOS PEQUENOS*/ 
 ];

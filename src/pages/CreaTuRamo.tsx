@@ -16,7 +16,7 @@ type BuilderOption = { id: string; sku: string; group: "flower" | "wrap" | "addo
 type PickerDraft = { type: string; optionId: string; quantity: number };
 type BouquetSize = "small" | "medium" | "large";
 const sizes: Record<BouquetSize, { label: string; flowers: number; price: number }> = {
-  small: { label: "Pequeño", flowers: 3, price: 5500 },
+  small: { label: "Pequeño", flowers: 3, price: 7500 },
   medium: { label: "Mediano", flowers: 6, price: 12000 },
   large: { label: "Grande", flowers: 12, price: 22000 },
 };

@@ -134,7 +134,7 @@ app.http("orders", { methods: ["POST"], authLevel: "anonymous", route: "orders",
     for (const item of body.items) {
       if (item.sku === "CUSTOM-BOUQUET") {
         if (!item.configuration?.length) { await tx.rollback(); return json({message:"El ramo personalizado no tiene opciones."},400); }
-        const bouquetSizes = { small:{name:"pequeño",flowers:3,price:5500}, medium:{name:"mediano",flowers:6,price:12000}, large:{name:"grande",flowers:12,price:22000} } as const;
+        const bouquetSizes = { small:{name:"pequeño",flowers:3,price:7500}, medium:{name:"mediano",flowers:6,price:12000}, large:{name:"grande",flowers:12,price:22000} } as const;
         const size = item.bouquetSize && bouquetSizes[item.bouquetSize];
         if (!size) { await tx.rollback(); return json({message:"Selecciona el tamaño del ramo personalizado."},400); }
         const resolved: Array<{id:string;sku:string;name:string;quantity:number;unitPrice:number}> = [];
